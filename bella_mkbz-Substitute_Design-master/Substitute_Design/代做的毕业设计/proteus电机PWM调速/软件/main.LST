@@ -1,0 +1,125 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              02/15/2020 18:07:33 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: D:\software install\Keil_C51\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND TAB
+                    -S(2)
+
+line level    source
+
+   1          #include <reg51.h>
+   2          #include <intrins.h>
+   3          #include "lcd.h"
+   4          
+   5          sbit Motor_A  =  P1^5;
+   6          sbit Motor_B  =  P1^6;
+   7          sbit Motor_EN =  P1^7;
+   8          sbit KEY1 = P2^4;
+   9          sbit KEY2 = P2^5;
+  10          sbit LED1 = P3^6;
+  11          sbit LED2 = P3^7;
+  12          
+  13          unsigned char Flag = 0; //正反转标志
+  14          
+  15          static int Pulse = 50;
+  16          
+  17          void main()
+  18          { 
+  19   1        Motor_A = 1;
+  20   1        Motor_B = 0;
+  21   1        Motor_EN = 0;
+  22   1        TMOD = 0X01;
+  23   1        IT0 = 1;                        
+  24   1        EX0 = 1;  
+  25   1        IT1 = 1;                        
+  26   1        EX1 = 1;  
+  27   1        TL0 = 0x66;   //设置定时初值
+  28   1        TH0 = 0xFC;   //设置定时初值
+  29   1        EA = 1;
+  30   1        ET0 = 1;
+  31   1        TR0 = 1;                   
+  32   1        LcdInit();  
+  33   1        Show_String(0x85,"PWM:");
+  34   1        Show_Dec_Number(0x89,Pulse);
+  35   1        while(1)
+  36   1        {   
+  37   2          Show_Dec_Number(0x89,Pulse);
+  38   2          if(Pulse == 0)
+  39   2          {
+  40   3            Show_String(0xc5,"STOP    ");
+  41   3            LED1 = 1;
+  42   3            LED2 = 1;
+  43   3          }
+  44   2          else if(Motor_B)
+  45   2          {
+  46   3            Show_String(0xc5,"Backward");
+  47   3            LED1 = 1;
+  48   3            LED2 = 0;
+  49   3          }
+  50   2          else if(Motor_A)
+  51   2          {
+  52   3            Show_String(0xc5,"Foreward");
+  53   3            LED1 = 0;
+  54   3            LED2 = 1;
+C51 COMPILER V9.60.0.0   MAIN                                                              02/15/2020 18:07:33 PAGE 2   
+
+  55   3          }   
+  56   2      
+  57   2        }
+  58   1      }
+  59          
+  60          void Timer_0(void) interrupt 1
+  61          {
+  62   1        static unsigned char Count = 0;
+  63   1        TL0 = 0x66;   //设置定时初值
+  64   1        TH0 = 0xFC;   //设置定时初值
+  65   1        Count++;
+  66   1        if(Count > 100)
+  67   1           Count = 1;
+  68   1        if(Count <= Pulse)
+  69   1          Motor_EN = 1;
+  70   1        else
+  71   1          Motor_EN = 0;
+  72   1      }
+  73          
+  74          void exint0() interrupt 0         
+  75          {
+  76   1        if(!KEY1)
+  77   1        {
+  78   2          Motor_A = !Motor_A; 
+  79   2          Motor_B = !Motor_B; 
+  80   2        }
+  81   1        else if(!KEY2)
+  82   1        {
+  83   2          Pulse = Pulse + 10;
+  84   2          if(Pulse >= 100)
+  85   2            Pulse = 100;
+  86   2        }
+  87   1        else
+  88   1        {
+  89   2            Pulse = Pulse - 10;
+  90   2          if(Pulse <= 0)
+  91   2            Pulse = 0;  
+  92   2        }
+  93   1      
+  94   1      }
+  95          
+  96          void exint1() interrupt 2
+  97          {
+  98   1        Pulse = 0;
+  99   1      }  
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    274    ----
+   CONSTANT SIZE    =     32    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      4    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

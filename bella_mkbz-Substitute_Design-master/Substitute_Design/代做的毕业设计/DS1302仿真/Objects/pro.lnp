@@ -1,0 +1,7 @@
+".\Objects\button.obj",
+".\Objects\lcd.obj",
+".\Objects\main.obj",
+".\Objects\ds1302.obj",
+".\Objects\delay.obj" 
+TO ".\Objects\pro" 
+PRINT(".\Listings\pro.m51") RAMSIZE(256) 

@@ -1,0 +1,169 @@
+C51 COMPILER V9.59.0.0   MAIN                                                              05/19/2019 18:27:07 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\keil C51\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\mai
+                    -n.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include "delay.h"
+   2          #include "uart.h"
+   3          
+   4          /*************************本地程序定义变量*****************************/
+   5          #define Buf2_Max 256                    // 串口2接收最大长度
+   6          u8 PWM = 0;                            // PWM值
+   7          bit Rec_Flag;                           // 串口2帧数据接收完成标志
+   8          unsigned char Rec_Len = 0;              // 串口2接收数据长度
+   9          xdata unsigned char Rec_Buff[Buf2_Max]; // 串口2接收数据缓冲区
+  10          sbit PWM_Port = P2^3;                   // PWM输出端口
+  11          sbit Motor_A = P2^4;
+  12          sbit Motor_B = P2^5;
+  13          /*********************************************************************/
+  14          
+  15          /*************************本地函数定义********************************/
+  16          void Timer0Init(void);
+  17          void Timer1Init(void);  
+  18          void CLR_Buf2(void);
+  19          /*********************************************************************/
+  20          
+  21          void main(void)
+  22          {
+  23   1          u8 i = 0;
+  24   1          Timer0Init();
+  25   1          Timer1Init(); 
+  26   1          Uart1Init();
+  27   1          Uart2Init();
+  28   1          Motor_A = 1;
+  29   1          Motor_B = 0;
+  30   1          PWM_Port = 1;
+  31   1          delay_ms(1000);
+  32   1          EA = 1;
+  33   1          for(;;)
+  34   1          {
+  35   2            if(Rec_Flag)
+  36   2            {
+  37   3              Rec_Flag = 0;
+  38   3              if(Rec_Len < 3 && (Rec_Buff[0] - 0x30) <=9 && (Rec_Buff[0] - 0x30) >= 0 && (Rec_Buff[1] - 0x30) <= 9 &
+             -& (Rec_Buff[1] - 0x30) >= 0) 
+  39   3              {
+  40   4                PWM = (Rec_Buff[0] - 0x30) * 10 + (Rec_Buff[1] - 0x30);
+  41   4              }
+  42   3              if(Rec_Buff[0] == '+')
+  43   3              {
+  44   4                Motor_A = 1;
+  45   4                Motor_B = 0;
+  46   4              }
+  47   3              else if(Rec_Buff[0] == '-')
+  48   3              {
+  49   4                Motor_A = 0;
+  50   4                Motor_B = 1;
+  51   4              }
+  52   3              CLR_Buf2();
+  53   3            }
+C51 COMPILER V9.59.0.0   MAIN                                                              05/19/2019 18:27:07 PAGE 2   
+
+  54   2          }
+  55   1      }
+  56          
+  57          void Uart2() interrupt 8
+  58          {
+  59   1          IE2  &= ~0x01;   //关闭串口2中断
+  60   1          if (S2CON & S2RI)
+  61   1          {
+  62   2            S2CON &= ~S2RI;                 //清除S2RI位
+  63   2            ET1 = 0;                        //关闭定时器1中断
+  64   2            Rec_Buff[Rec_Len] = S2BUF;      //将接收到的字符串存到缓存中
+  65   2            Rec_Len++;                      //缓存指针向后移动
+  66   2            if(Rec_Len > Buf2_Max)          //如果缓存满,将缓存指针指向缓存的首地址
+  67   2            {
+  68   3              Rec_Len = 0;
+  69   3            }
+  70   2            TL1 = 0xB0;                     //设置定时初值
+  71   2            TH1 = 0x3C;                     //设置定时初值
+  72   2            ET1 = 1;                        //打开定时器1中断     
+  73   2          }
+  74   1          if (S2CON & S2TI)
+  75   1          {
+  76   2            S2CON &= ~S2TI;         //清除S2TI位
+  77   2          }
+  78   1          IE2  |= 0x01;   //使能串口2中断
+  79   1      }
+  80          
+  81          void Timer0() interrupt 1
+  82          {
+  83   1          static int count = 0;
+  84   1          TR0 = 0;
+  85   1          count++;
+  86   1          if(count > 100)
+  87   1            count = 0;
+  88   1          if(count >= (100 - PWM ))
+  89   1            PWM_Port = 1;
+  90   1          else
+  91   1            PWM_Port = 0;
+  92   1          TR0 = 1;
+  93   1      }
+  94          
+  95          void Timer1() interrupt 3
+  96          {
+  97   1          static u8 i = 0;
+  98   1          TL1 = 0x00;   //设置定时初值
+  99   1          TH1 = 0xDC;   //设置定时初值
+ 100   1          i++;
+ 101   1          if(i == 6)
+ 102   1          {
+ 103   2            Rec_Flag = 1;
+ 104   2            ET1 = 0;  
+ 105   2            i = 0;    
+ 106   2          }
+ 107   1      }
+ 108          
+ 109          void Timer0Init(void)   //500微秒@11.0592MHz
+ 110          {
+ 111   1          AUXR &= 0x7F;   //定时器时钟12T模式
+ 112   1          TMOD &= 0xF0;   //设置定时器模式
+ 113   1          TMOD |= 0x02;   //设置定时器模式
+ 114   1          TL0 = 0x48;     //设置定时初值
+ 115   1          TH0 = 0x48;     //设置定时重载值
+C51 COMPILER V9.59.0.0   MAIN                                                              05/19/2019 18:27:07 PAGE 3   
+
+ 116   1          TF0 = 0;    //清除TF0标志
+ 117   1          TR0 = 1;    //定时器0开始计时
+ 118   1          ET0 = 1;    //打开定时器0中断
+ 119   1      }
+ 120          
+ 121          void Timer1Init(void)   //10毫秒@11.0592MHz
+ 122          {
+ 123   1          AUXR &= 0xBF;   //定时器时钟12T模式
+ 124   1          TMOD &= 0x0F;   //设置定时器模式
+ 125   1          TMOD |= 0x10;   //设置定时器模式
+ 126   1          TL1 = 0x00;   //设置定时初值
+ 127   1          TH1 = 0xDC;   //设置定时初值
+ 128   1          TF1 = 0;    //清除TF1标志
+ 129   1          TR1 = 1;    //定时器1开始计时
+ 130   1      }
+ 131          
+ 132          void CLR_Buf2(void)
+ 133          {
+ 134   1          u16 k;
+ 135   1          for(k=0;k<Buf2_Max;k++)      //将缓存内容清零
+ 136   1          {
+ 137   2            Rec_Buff[k] = 0x00;
+ 138   2          }
+ 139   1          Rec_Len = 0;              //接收字符串的起始存储位置
+ 140   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    397    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =    256    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      5       1
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

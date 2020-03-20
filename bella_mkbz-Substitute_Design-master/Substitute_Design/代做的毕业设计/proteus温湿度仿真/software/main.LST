@@ -1,0 +1,201 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              03/12/2020 12:47:06 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: D:\software install\Keil_C51\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND TAB
+                    -S(2)
+
+line level    source
+
+   1          #include <reg51.h>
+   2          #include <intrins.h>
+   3          #include "delay.h"
+   4          #include "lcd.h"
+   5          #include "ADC0832.h"
+   6          #include "dht11.h"
+   7          
+   8          unsigned char Model = 0, Model_1_Flag = 0, Flag = 1;
+   9          unsigned char humidity_upper = 60, humidity_down = 45, humidity_opti = 50, humidity = 0;
+  10          unsigned int Water_level = 0, Water_level_limit = 20;
+  11          unsigned char  Sub_Power = 1; //加湿器电源
+  12          unsigned char Pulse = 50;
+  13          
+  14          sbit Motor_A  =  P1^5;
+  15          sbit Motor_B  =  P1^6;
+  16          sbit Motor_EN =  P1^7;
+  17          sbit speaker =  P3^7;
+  18          sbit LED =  P3^5;
+  19          
+  20          void main()
+  21          {   
+  22   1        Motor_A = 0;
+  23   1        Motor_B = 0;
+  24   1        Motor_EN = 1;
+  25   1        IT0 = 1;                        
+  26   1        EX0 = 1; 
+  27   1        IT1 = 1;                        
+  28   1        EX1 = 1;    
+  29   1        TMOD = 0X01;
+  30   1        TL0 = 0xb0;   //设置定时初值
+  31   1        TH0 = 0x3c;   //设置定时初值
+  32   1        EA = 1;
+  33   1        ET0 = 1;
+  34   1        TR0 = 0;  
+  35   1        LcdInit();
+  36   1        Show_String(0X80,"H:"); 
+  37   1        Show_String(0XC0,"W:"); 
+  38   1        while(1)
+  39   1        { 
+  40   2          humidity = DHT11_receive();
+  41   2          Water_level = (unsigned int)(adc0832(0)/255.0*100);
+  42   2          Show_Dec_Number(0X82,humidity); 
+  43   2          Show_Dec_Number(0Xc2,Water_level);
+  44   2      
+  45   2          if(!Model)
+  46   2          {
+  47   3            if(humidity < humidity_down)
+  48   3              Show_String(0X87,"Low!");
+  49   3            else if(humidity > humidity_upper)
+  50   3              Show_String(0X87,"High");
+  51   3            else
+  52   3              Show_String(0X87,"Suit");
+  53   3          }
+  54   2          else
+C51 COMPILER V9.60.0.0   MAIN                                                              03/12/2020 12:47:06 PAGE 2   
+
+  55   2          {
+  56   3            if(humidity < humidity_opti)
+  57   3              Show_String(0X87,"Low!");
+  58   3            else if(humidity > humidity_opti)
+  59   3              Show_String(0X87,"High");
+  60   3            else
+  61   3              Show_String(0X87,"Suit");     
+  62   3          }
+  63   2          
+  64   2          if(Water_level >= Water_level_limit)  
+  65   2          {
+  66   3              if(Flag)
+  67   3              {
+  68   4                Show_String(0XC7,"         ");
+  69   4                Flag = 0;
+  70   4                speaker = 1;
+  71   4              }
+  72   3          }
+  73   2          else
+  74   2          {
+  75   3            speaker = 0;
+  76   3            Show_String(0XC7,"Add water");  
+  77   3          }       
+  78   2      
+  79   2          if(Sub_Power ==1)
+  80   2          {
+  81   3              if(Water_level >= Water_level_limit)  
+  82   3              {
+  83   4      
+  84   4                  if(!Model)
+  85   4                  {
+  86   5                      LED = 1;
+  87   5                      Motor_A = 0; //无论进入哪个模式，都先关闭，为了防止切换模式干扰
+  88   5                      if(humidity < humidity_down)
+  89   5                      {
+  90   6                        Model_1_Flag = 1;
+  91   6                        Motor_A = 1;
+  92   6                        LED = 0;
+  93   6                      }
+  94   5                      else if(humidity > humidity_upper)
+  95   5                      {
+  96   6                        Model_1_Flag = 0;
+  97   6                        Motor_A = 0;
+  98   6                        LED = 1;
+  99   6                      }
+ 100   5                      if((humidity >= humidity_down) && (Model_1_Flag == 1))
+ 101   5                      {
+ 102   6                        LED = 0;
+ 103   6                        Motor_A = 1;
+ 104   6                        Delay1ms(130);
+ 105   6                        Motor_A = 0;
+ 106   6                      }
+ 107   5      
+ 108   5                  }
+ 109   4                  else if(Model)
+ 110   4                  {
+ 111   5                    Model_1_Flag = 0; 
+ 112   5                      
+ 113   5                      Motor_A = 0;    //无论进入哪个模式，都先关闭，为了防止切换模式干扰
+ 114   5                    if(humidity < humidity_opti)
+ 115   5                    {
+ 116   6                      LED = 0;
+C51 COMPILER V9.60.0.0   MAIN                                                              03/12/2020 12:47:06 PAGE 3   
+
+ 117   6                      Motor_A = 1;
+ 118   6                    }         
+ 119   5                    else
+ 120   5                    {
+ 121   6                      Motor_A = 0;
+ 122   6                      LED = 1;
+ 123   6                    }
+ 124   5                  }
+ 125   4              }
+ 126   3              else
+ 127   3              {
+ 128   4                Motor_A = 0;
+ 129   4                Flag = 1;
+ 130   4                LED = 1;
+ 131   4              }
+ 132   3          }
+ 133   2          else
+ 134   2          {
+ 135   3            Show_String(0x8D,"Off");
+ 136   3            Motor_A = 0;
+ 137   3            LED = 1;
+ 138   3          }
+ 139   2                
+ 140   2        }
+ 141   1      }
+ 142          
+ 143          void exint0() interrupt 0         
+ 144          {
+ 145   1        if(Sub_Power == 1)
+ 146   1         Model = !Model;
+ 147   1      }
+ 148          
+ 149          void exint1() interrupt 2         
+ 150          {
+ 151   1        TR0 = 1;  
+ 152   1        Show_String(0x8D,"B30");
+ 153   1      }
+ 154          
+ 155          
+ 156          void Timer_0() interrupt 1
+ 157          {
+ 158   1        static unsigned int i = 0;
+ 159   1        TL0 = 0xb0;   //设置定时初值
+ 160   1        TH0 = 0x3c;   //设置定时初值
+ 161   1        i++;
+ 162   1        if(i == 200)
+ 163   1        {
+ 164   2          Sub_Power = 0; //打开加湿器电源
+ 165   2          i = 0;
+ 166   2          TR0 = 0;
+ 167   2        }
+ 168   1      }
+ 169          
+ 170          
+ 171          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    523    ----
+   CONSTANT SIZE    =     49    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+C51 COMPILER V9.60.0.0   MAIN                                                              03/12/2020 12:47:06 PAGE 4   
+
+   DATA SIZE        =     15    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

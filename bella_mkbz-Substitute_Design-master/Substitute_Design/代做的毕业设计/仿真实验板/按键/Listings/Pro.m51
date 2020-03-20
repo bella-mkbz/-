@@ -1,0 +1,178 @@
+BL51 BANKED LINKER/LOCATER V6.22                                                        10/16/2017  19:37:20  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
+C:\KEIL_V5\C51\BIN\BL51.EXE .\Objects\button.obj, .\Objects\delay.obj, .\Objects\main.obj TO .\Objects\Pro PRINT (.\List
+>> ings\Pro.m51) RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  .\Objects\button.obj (BUTTON)
+  .\Objects\delay.obj (DELAY)
+  .\Objects\main.obj (MAIN)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_STARTUP)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_INIT)
+
+
+LINK MAP OF MODULE:  .\Objects\Pro (BUTTON)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0002H     UNIT         _DATA_GROUP_
+            DATA    000AH     0001H     UNIT         ?DT?BUTTON
+            DATA    000BH     0001H     UNIT         ?DT?MAIN
+            IDATA   000CH     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     00C9H     UNIT         ?PR?MAIN?MAIN
+            CODE    00CCH     008CH     UNIT         ?C_C51STARTUP
+            CODE    0158H     002CH     UNIT         ?PR?BUTTON_VALUE?BUTTON
+            CODE    0184H     0020H     UNIT         ?PR?_DELAY1MS?DELAY
+            CODE    01A4H     0010H     UNIT         ?CO?MAIN
+            CODE    01B4H     0004H     UNIT         ?C_INITSEG
+
+
+
+OVERLAY MAP OF MODULE:   .\Objects\Pro (BUTTON)
+
+
+SEGMENT                           DATA_GROUP 
+  +--> CALLED SEGMENT           START    LENGTH
+-----------------------------------------------
+?C_C51STARTUP                   -----    -----
+  +--> ?PR?MAIN?MAIN
+  +--> ?C_INITSEG
+
+?PR?MAIN?MAIN                   0008H    0002H
+  +--> ?CO?MAIN
+  +--> ?PR?_DELAY1MS?DELAY
+  +--> ?PR?BUTTON_VALUE?BUTTON
+
+?PR?BUTTON_VALUE?BUTTON         -----    -----
+  +--> ?PR?_DELAY1MS?DELAY
+
+BL51 BANKED LINKER/LOCATER V6.22                                                      10/16/2017  19:37:20  PAGE 2
+
+
+
+
+SYMBOL TABLE OF MODULE:  .\Objects\Pro (BUTTON)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        BUTTON
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:00A0H         PUBLIC        P2
+  B:00A0H.4       PUBLIC        KEY2
+  B:00A0H.5       PUBLIC        KEY3
+  C:0158H         PUBLIC        Button_Value
+  -------         PROC          BUTTON_VALUE
+  -------         DO            
+  D:000AH         SYMBOL        key_up
+  -------         ENDDO         
+  C:0158H         LINE#         4
+  C:0158H         LINE#         5
+  C:0158H         LINE#         7
+  C:0162H         LINE#         8
+  C:0162H         LINE#         9
+  C:0169H         LINE#         10
+  C:016CH         LINE#         11
+  C:016FH         LINE#         12
+  C:0172H         LINE#         13
+  C:0175H         LINE#         14
+  C:0178H         LINE#         15
+  C:0178H         LINE#         16
+  C:017EH         LINE#         17
+  C:0181H         LINE#         18
+  C:0183H         LINE#         19
+  -------         ENDPROC       BUTTON_VALUE
+  -------         ENDMOD        BUTTON
+
+  -------         MODULE        DELAY
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  C:0184H         PUBLIC        _Delay1ms
+  -------         PROC          _DELAY1MS
+  D:0006H         SYMBOL        count
+  -------         DO            
+  D:0004H         SYMBOL        i
+  D:0002H         SYMBOL        j
+  -------         ENDDO         
+  C:0184H         LINE#         3
+  C:0184H         LINE#         4
+  C:0184H         LINE#         6
+  C:018EH         LINE#         7
+  C:01A3H         LINE#         8
+  -------         ENDPROC       _DELAY1MS
+  -------         ENDMOD        DELAY
+
+  -------         MODULE        MAIN
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0080H         PUBLIC        P0
+  D:0090H         PUBLIC        P1
+  D:00A0H         PUBLIC        P2
+BL51 BANKED LINKER/LOCATER V6.22                                                      10/16/2017  19:37:20  PAGE 3
+
+
+  C:01A4H         PUBLIC        Duan
+  B:00A0H.2       PUBLIC        KEY0
+  B:00A0H.3       PUBLIC        KEY1
+  C:0003H         PUBLIC        main
+  B:0090H.0       PUBLIC        ADDR0
+  B:0090H.1       PUBLIC        ADDR1
+  B:0090H.2       PUBLIC        ADDR2
+  B:0090H.3       PUBLIC        ADDR3
+  B:0090H.4       PUBLIC        ENLED
+  -------         PROC          MAIN
+  -------         DO            
+  D:000BH         SYMBOL        temp
+  D:0008H         SYMBOL        i
+  D:0009H         SYMBOL        j
+  -------         ENDDO         
+  C:0003H         LINE#         17
+  C:0003H         LINE#         18
+  C:0003H         LINE#         20
+  C:0008H         LINE#         21
+  C:000AH         LINE#         22
+  C:000CH         LINE#         23
+  C:000EH         LINE#         24
+  C:0010H         LINE#         25
+  C:0010H         LINE#         26
+  C:0010H         LINE#         27
+  C:0028H         LINE#         28
+  C:0028H         LINE#         29
+  C:002EH         LINE#         30
+  C:0036H         LINE#         31
+  C:0044H         LINE#         32
+  C:005AH         LINE#         33
+  C:005AH         LINE#         34
+  C:0062H         LINE#         35
+  C:0078H         LINE#         36
+  C:007DH         LINE#         38
+  C:0084H         LINE#         39
+  C:0086H         LINE#         40
+  C:0086H         LINE#         41
+  C:008FH         LINE#         42
+  C:009EH         LINE#         43
+  C:00A3H         LINE#         45
+  C:00AAH         LINE#         46
+  C:00B1H         LINE#         48
+  C:00B1H         LINE#         49
+  C:00B1H         LINE#         50
+  C:00B6H         LINE#         51
+  C:00C2H         LINE#         52
+  C:00C2H         LINE#         53
+  C:00C7H         LINE#         54
+  -------         ENDPROC       MAIN
+  -------         ENDMOD        MAIN
+
+Program Size: data=13.0 xdata=0 code=440
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

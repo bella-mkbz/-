@@ -1,0 +1,326 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              03/12/2020 22:23:24 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: D:\software install\Keil_C51\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND TAB
+                    -S(2)
+
+line level    source
+
+   1          #include <reg51.h>
+   2          #include <intrins.h>
+   3          #include "lcd.h"
+   4          #include "ADC0832.h"
+   5          #include "dht11.h"
+   6          
+   7          unsigned char *Rec_buffer, humidity, temperature;
+   8          unsigned int Water_level , Moonth = 9, Day = 1;
+   9          
+  10          /************按键定义变量**************/
+  11          sbit key_1 = P2^0;
+  12          sbit key_2 = P2^1;
+  13          sbit key_3 = P2^2;
+  14          sbit key_4 = P2^3;
+  15          sbit key_5 = P2^4;
+  16          sbit key_6 = P2^5;
+  17          sbit key_7 = P2^6;
+  18          /**************************************/
+  19          
+  20          /************LED变量**************/
+  21          sbit L_1 = P1^3;
+  22          sbit L_2 = P1^4;
+  23          sbit L_3 = P1^5;
+  24          sbit L_4 = P1^6;
+  25          sbit L_5 = P1^7;
+  26          /*********************************/
+  27          
+  28          /************农药电机*************/
+  29          sbit Moter_1 = P3^0;
+  30          sbit Moter_2 = P3^1;
+  31          sbit Moter_3 = P3^3;
+  32          /*********************************/
+  33          
+  34          /************病菌**************/
+  35          bit B_1 = 0, B_2 = 0, B_3 = 0, B_4 = 0, B_5 = 0;
+  36          /******************************/
+  37          
+  38          void main()
+  39          {   
+  40   1        Moter_1 = 0;
+  41   1        Moter_2 = 0;
+  42   1        Moter_3 = 0;
+  43   1        IT0 = 1;                        
+  44   1        EX0 = 1; 
+  45   1        EA = 1;
+  46   1        LcdInit();
+  47   1        Show_String(0X80,"W:"); 
+  48   1        Show_String(0X85,"H:"); 
+  49   1        Show_String(0X8A,"N:"); 
+  50   1        Show_String(0Xc0,"D:"); 
+  51   1        Show_Dec_Number(0Xc2,Moonth); 
+  52   1        Show_String(0Xc4,"-");
+  53   1        Show_Dec_Number(0Xc5,Day);  
+  54   1        while(1)
+C51 COMPILER V9.60.0.0   MAIN                                                              03/12/2020 22:23:24 PAGE 2   
+
+  55   1        { 
+  56   2          Show_Dec_Number(0Xc2,Moonth); 
+  57   2          Show_Dec_Number(0Xc5,Day);
+  58   2          Rec_buffer = DHT11_receive();
+  59   2          humidity = Rec_buffer[0];
+  60   2          temperature = Rec_buffer[1];
+  61   2          Water_level = (unsigned int)(adc0832(0)/255.0*100);
+  62   2          Show_Dec_Number(0X82,temperature);  
+  63   2          Show_Dec_Number(0X87,humidity);   
+  64   2          Show_Dec_Number(0X8C,Water_level);
+  65   2          if(B_5 == 1 && Water_level > 35 && temperature<10 && humidity >65)
+  66   2            L_5 = 0;
+  67   2          else
+  68   2          {
+  69   3            B_5 = 0;
+  70   3            L_5 = 1;
+  71   3          }
+  72   2          switch (Moonth)
+  73   2          {
+  74   3            case 9:
+  75   3              if(Day > 20)
+  76   3                Show_String(0Xca,"Sowing"); 
+  77   3              else
+  78   3                Show_String(0Xca,"      ");
+  79   3              break;
+  80   3            case 10:
+  81   3              if(Day < 10)
+  82   3                Show_String(0Xca,"Sowing"); 
+  83   3              else
+  84   3                Show_String(0Xca,"      ");       
+  85   3              break;
+  86   3            case 11:
+  87   3                Show_String(0Xca,"      ");   
+  88   3              break;
+  89   3            case 1:
+  90   3              if(B_3 == 1 && temperature<3 && (humidity > 65 || humidity < 35))
+  91   3              {
+  92   4                Moter_3 = 1;
+  93   4                L_3 = 0;
+  94   4              }
+  95   3              else
+  96   3              {
+  97   4                Moter_3 = 0;
+  98   4                B_3 = 0;
+  99   4                L_3 = 1;
+ 100   4              }
+ 101   3              break;
+ 102   3            case 2:
+ 103   3              if(Day < 20)
+ 104   3              {
+ 105   4                if(B_3 == 1 && temperature<3 && (humidity > 65 || humidity < 35))
+ 106   4                {
+ 107   5                  Moter_3 = 1;
+ 108   5                  L_3 = 0;
+ 109   5                }       
+ 110   4                else
+ 111   4                {
+ 112   5                  Moter_3 = 0;
+ 113   5                  B_3 = 0;
+ 114   5                  L_3 = 1;
+ 115   5                }
+ 116   4              }
+C51 COMPILER V9.60.0.0   MAIN                                                              03/12/2020 22:23:24 PAGE 3   
+
+ 117   3              else
+ 118   3              {
+ 119   4                Moter_3 = 0;
+ 120   4                  B_3 = 0;
+ 121   4                  L_3 = 1;        
+ 122   4              }
+ 123   3              break;
+ 124   3            case 3:
+ 125   3              Moter_3 = 0;
+ 126   3                  B_3 = 0;
+ 127   3                  L_3 = 1;        
+ 128   3              if(Day > 20)
+ 129   3              {
+ 130   4                if(B_1 == 1 && temperature <= 20 && temperature >= 15 && Water_level > 35 && humidity > 70)
+ 131   4                {
+ 132   5                  Moter_1 = 1;
+ 133   5                  L_1 = 0;
+ 134   5                } 
+ 135   4                else
+ 136   4                {
+ 137   5                  Moter_1 = 0;
+ 138   5                  B_1 = 0;
+ 139   5                  L_1 = 1;        
+ 140   5                }
+ 141   4              }
+ 142   3              else
+ 143   3              {
+ 144   4                Moter_1 = 0;
+ 145   4                  B_1 = 0;
+ 146   4                  L_1 = 1;              
+ 147   4              }
+ 148   3        
+ 149   3              break;
+ 150   3            case 4:
+ 151   3              if(Day < 10)
+ 152   3              {
+ 153   4                if(B_1 == 1 && temperature <= 20 && temperature >= 15 && Water_level > 35 && humidity > 70)
+ 154   4                {
+ 155   5                  Moter_1 = 1;
+ 156   5                  L_1 = 0;
+ 157   5                }   
+ 158   4                else
+ 159   4                {
+ 160   5                  Moter_1 = 0;
+ 161   5                  B_1 = 0;
+ 162   5                  L_1 = 1;        
+ 163   5                } 
+ 164   4              }
+ 165   3              else
+ 166   3              {
+ 167   4                  Moter_1 = 0;
+ 168   4                  B_1 = 0;
+ 169   4                  L_1 = 1;              
+ 170   4              }       
+ 171   3              
+ 172   3              if(B_2 == 1 && temperature <= 25 && temperature >= 19  && humidity > 64)
+ 173   3              {
+ 174   4                Moter_2 = 1;
+ 175   4                L_2 = 0;
+ 176   4              }
+ 177   3                
+ 178   3              else
+C51 COMPILER V9.60.0.0   MAIN                                                              03/12/2020 22:23:24 PAGE 4   
+
+ 179   3              {
+ 180   4                Moter_2 = 0;
+ 181   4                B_2 = 0;
+ 182   4                L_2 = 1;        
+ 183   4              } 
+ 184   3      
+ 185   3              if(Day > 20)
+ 186   3              {
+ 187   4                if(B_4 == 1 && humidity > 65)
+ 188   4                  L_4 = 0;
+ 189   4                else
+ 190   4                {
+ 191   5                  B_4 = 0;
+ 192   5                  L_4 = 1;        
+ 193   5                } 
+ 194   4              }
+ 195   3              else
+ 196   3                {
+ 197   4                  B_4 = 0;
+ 198   4                  L_4 = 1;        
+ 199   4                } 
+ 200   3              break;
+ 201   3            case 5:
+ 202   3              Moter_1 = 0;
+ 203   3              B_1 = 0;
+ 204   3              L_1 = 1;  
+ 205   3              if(Day < 10)
+ 206   3              {
+ 207   4                if(B_4 == 1 && humidity > 65)
+ 208   4                  L_4 = 0;
+ 209   4                else
+ 210   4                {
+ 211   5                  B_4 = 0;
+ 212   5                  L_4 = 1;        
+ 213   5                } 
+ 214   4              }       
+ 215   3              else
+ 216   3                {
+ 217   4                  B_4 = 0;
+ 218   4                  L_4 = 1;        
+ 219   4                } 
+ 220   3              if(B_2 == 1 && temperature <= 25 && temperature >= 19  && humidity > 64)
+ 221   3              {
+ 222   4                Moter_2 = 1;
+ 223   4                  L_2 = 0;
+ 224   4              }
+ 225   3              
+ 226   3              else
+ 227   3              {
+ 228   4                Moter_2 = 0;
+ 229   4                B_2 = 0;
+ 230   4                L_2 = 1;        
+ 231   4              }         
+ 232   3              break;
+ 233   3            default:
+ 234   3              Moter_2 = 0;
+ 235   3                B_2 = 0;
+ 236   3                L_2 = 1;  
+ 237   3                B_4 = 0;
+ 238   3                L_4 = 1;      
+ 239   3              break;
+ 240   3          }
+C51 COMPILER V9.60.0.0   MAIN                                                              03/12/2020 22:23:24 PAGE 5   
+
+ 241   2        }
+ 242   1      }
+ 243          
+ 244          void exint0() interrupt 0         
+ 245          {
+ 246   1        if(!key_1)
+ 247   1        {
+ 248   2          Moonth++;
+ 249   2          if(Moonth == 13)
+ 250   2            Moonth = 1;
+ 251   2          else if(Moonth == 7)
+ 252   2            Moonth = 9;
+ 253   2        }
+ 254   1        else if(!key_2)
+ 255   1        {
+ 256   2          Day++;
+ 257   2          if((Moonth ==1 || Moonth ==3 || Moonth ==5 || Moonth ==10 || Moonth ==12))
+ 258   2          {
+ 259   3            if(Day == 32)
+ 260   3              Day = 1;  
+ 261   3          }
+ 262   2          else
+ 263   2          {
+ 264   3            if(Day==31)
+ 265   3              Day = 1;
+ 266   3          }
+ 267   2        }
+ 268   1        else if(!key_3)
+ 269   1        {
+ 270   2          B_1 = 1;
+ 271   2        }
+ 272   1        else if(!key_4)
+ 273   1        {
+ 274   2          B_2 = 1;
+ 275   2        }
+ 276   1        else if(!key_5)
+ 277   1        {
+ 278   2          B_3 = 1;
+ 279   2        }
+ 280   1        else if(!key_6)
+ 281   1        {
+ 282   2          B_4 = 1;
+ 283   2        }
+ 284   1        else if(!key_7)
+ 285   1        {
+ 286   2          B_5 = 1;
+ 287   2        } 
+ 288   1      }
+ 289          
+ 290          
+ 291          
+ 292          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    957    ----
+   CONSTANT SIZE    =     28    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     11    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      5    ----
+C51 COMPILER V9.60.0.0   MAIN                                                              03/12/2020 22:23:24 PAGE 6   
+
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

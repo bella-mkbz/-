@@ -1,0 +1,5 @@
+"AT89S52_CSB.obj",
+"lcd.obj",
+"Sound_Wave.obj" 
+TO "基于AT8951单片机的超声波测距系统" 
+RAMSIZE(256) 

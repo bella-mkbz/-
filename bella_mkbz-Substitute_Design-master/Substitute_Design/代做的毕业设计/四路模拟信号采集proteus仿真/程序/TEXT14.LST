@@ -1,0 +1,115 @@
+A51 MACRO ASSEMBLER  TEXT14                                                               12/06/2018 17:06:01 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN TEXT14.OBJ
+ASSEMBLER INVOKED BY: D:\keil3\C51\BIN\A51.EXE TEXT14.a51 SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1     ORG 0000H   
+0000 802E              2     SJMP START       
+0030                   3     ORG 0030H 
+                       4       
+0030                   5     START:
+0030 120052            6     LOOP1: LCALL DISPLAY         
+0033 120074            7            LCALL DELAY1  
+0036 D294              8                SETB P1.4
+0038 D295              9                SETB P1.5
+003A C296             10                CLR P1.6
+003C C290             11                CLR P1.0      
+003E C292             12            CLR P1.2      
+0040 D292             13            SETB P1.2
+0042 C292             14            CLR P1.2
+0044 B293             15     LOOP2: CPL P1.3
+0046 3091FB           16            JNB P1.1, LOOP2
+0049 D290             17            SETB P1.0       
+004B A8B0             18            MOV R0, P3      
+004D 120080           19            LCALL BTODZ        
+0050 80DE             20            SJMP LOOP1
+                      21                
+                      22                
+0052 793D             23     DISPLAY: MOV R1, #3DH
+0054 7AFD             24           MOV R2, #0FDH
+0056 7B03             25           MOV R3, #3
+0058 EA               26     LOOP: MOV A, R2
+0059 F5A0             27           MOV P2, A 
+005B 23               28               RL A   
+005C FA               29           MOV R2, A
+005D E7               30           MOV A, @R1    
+005E 09               31               INC R1
+005F 900093           32           MOV DPTR, #TAB
+0062 93               33           MOVC A, @A+ DPTR
+0063 F580             34               MOV P0, A
+0065 12006B           35               LCALL DELAY
+0068 DBEE             36               DJNZ R3, LOOP
+006A 22               37               RET
+                      38      
+006B 7D02             39     DELAY: MOV R5, #02H
+006D 7CFF             40     DEL:   MOV R4, #0FFH
+006F DCFE             41     DEL1:   DJNZ R4, DEL1
+0071 DDFA             42                     DJNZ R5, DEL
+0073 22               43                     RET
+                      44     
+0074 7F01             45     DELAY1: MOV R7, #01 
+0076 7E80             46     D11:    MOV R6, #80H 
+0078 120052           47     D12:    LCALL DISPLAY         
+007B DEFB             48     DJNZ    R6, D12        
+007D DFF7             49     DJNZ    R7, D11         
+007F 22               50     RET
+                      51     
+0080 E8               52     BTODZ: MOV A, R0         
+0081 75F064           53            MOV B, #100         
+0084 84               54            DIV AB         
+0085 F53D             55            MOV 3DH, A    ;百位    
+                      56               
+0087 E5F0             57            MOV A, B    
+0089 75F00A           58                MOV B, #10     
+A51 MACRO ASSEMBLER  TEXT14                                                               12/06/2018 17:06:01 PAGE     2
+
+008C 84               59            DIV AB        
+008D F53E             60            MOV 3EH, A     ;十位    
+008F 85F03F           61            MOV 3FH, B      ;个位   
+0092 22               62            RET
+                      63                
+0093 3F065B4F         64     TAB: DB 3FH, 06H, 5BH, 4FH, 66H, 6DH, 7DH, 07H, 7FH, 6FH, 77H, 7CH, 39H, 5EH, 79H, 71H, 00H
+                                 
+0097 666D7D07                
+009B 7F6F777C                
+009F 395E7971                
+00A3 00                      
+                      65                
+                      66     
+                      67     END
+A51 MACRO ASSEMBLER  TEXT14                                                               12/06/2018 17:06:01 PAGE     3
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+B. . . . . . . . .  D ADDR   00F0H   A   
+BTODZ. . . . . . .  C ADDR   0080H   A   
+D11. . . . . . . .  C ADDR   0076H   A   
+D12. . . . . . . .  C ADDR   0078H   A   
+DEL. . . . . . . .  C ADDR   006DH   A   
+DEL1 . . . . . . .  C ADDR   006FH   A   
+DELAY. . . . . . .  C ADDR   006BH   A   
+DELAY1 . . . . . .  C ADDR   0074H   A   
+DISPLAY. . . . . .  C ADDR   0052H   A   
+LOOP . . . . . . .  C ADDR   0058H   A   
+LOOP1. . . . . . .  C ADDR   0030H   A   
+LOOP2. . . . . . .  C ADDR   0044H   A   
+P0 . . . . . . . .  D ADDR   0080H   A   
+P1 . . . . . . . .  D ADDR   0090H   A   
+P2 . . . . . . . .  D ADDR   00A0H   A   
+P3 . . . . . . . .  D ADDR   00B0H   A   
+START. . . . . . .  C ADDR   0030H   A   
+TAB. . . . . . . .  C ADDR   0093H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

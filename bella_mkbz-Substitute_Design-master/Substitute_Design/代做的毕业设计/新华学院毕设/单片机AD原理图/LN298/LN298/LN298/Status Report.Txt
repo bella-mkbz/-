@@ -1,0 +1,11 @@
+Output: Simple BOM
+Type  : SimpleBOM
+From  : Project [Free Documents]
+   Generated File[L298N.BOM]
+   Generated File[L298N.CSV]
+
+
+Files Generated   : 2
+Documents Printed : 0
+
+Finished Output Generation At 16:52:43 On 2014-11-13

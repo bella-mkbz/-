@@ -1,0 +1,203 @@
+C51 COMPILER V9.57.0.0   MAIN                                                              04/28/2018 02:38:33 PAGE 1   
+
+
+C51 COMPILER V9.57.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: D:\mdk\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND TABS(2)
+
+line level    source
+
+   1          #include<reg51.h>
+   2          #include<intrins.h>
+   3          #include "delay.h"
+   4          #include "button.h"
+   5          #include "lcd.h"
+   6          sbit Motor_A  =  P1^5;
+   7          sbit Motor_B  =  P1^6;
+   8          sbit Motor_EN =  P1^7;
+   9          sbit Relay = P2^1;
+  10          sbit Led = P2^2;
+  11          
+  12          static char Pulse = 100;
+  13          bit Mode_Flag = 0;
+  14          bit Start_Stop_Flag = 0;
+  15          bit Temp_Flag = 0;
+  16          bit Flag;
+  17          extern bit Start18B20();
+  18          extern bit Get18B20Temp(int *temp);
+  19          void GetShowTemp();
+  20          void main()
+  21          { 
+  22   1        unsigned char temp;
+  23   1        int temparature;
+  24   1        bit Show_Flag=0;
+  25   1        Start18B20();
+  26   1        Motor_A = 1;
+  27   1        Motor_B = 0;
+  28   1        Motor_EN = 0;
+  29   1        TMOD = 0X12;
+  30   1        TH0 = 0X74;
+  31   1        TL0 = 0X74;
+  32   1        TH1 = 0X3c;
+  33   1        TL1 = 0Xb0;
+  34   1        EA = 1;
+  35   1        ET0 = 1;
+  36   1        ET1 = 1;
+  37   1        IT0 = 1;                        //set INT0 int type (1:Falling 0:Low level)
+  38   1        EX0 = 1;                        //enable INT0 interrupt
+  39   1        LcdInit();  
+  40   1        Show_String(0x80,"Mode:Manu");
+  41   1        while(1)
+  42   1        {
+  43   2          GetShowTemp();
+  44   2          temp = Button_Value();
+  45   2          switch (temp)
+  46   2          {  
+  47   3            case 1:Mode_Flag = ~Mode_Flag;
+  48   3                 Flag = Mode_Flag;
+  49   3                 break;
+  50   3            case 2:Start_Stop_Flag = ~Start_Stop_Flag;     
+  51   3                   break;
+  52   3              case 3:Pulse -=35;
+  53   3               if(Pulse <= 0)
+  54   3                Pulse = 0;               
+  55   3                   break;
+C51 COMPILER V9.57.0.0   MAIN                                                              04/28/2018 02:38:33 PAGE 2   
+
+  56   3              case 4:Pulse +=35;
+  57   3               if(Pulse >= 100)
+  58   3                Pulse = 100;
+  59   3                   break;
+  60   3            default:
+  61   3                   break;
+  62   3          }
+  63   2           if((Mode_Flag==0)&&(Start_Stop_Flag==1))
+  64   2         {
+  65   3           if(Temp_Flag)
+  66   3           {
+  67   4             Temp_Flag = 0;
+  68   4             TR0 = 1;
+  69   4             Show_Flag = 1;
+  70   4           }
+  71   3      
+  72   3      
+  73   3          }
+  74   2         else if((Mode_Flag==0)&&(Start_Stop_Flag==0))
+  75   2         {
+  76   3           TR0 = 0;
+  77   3           Motor_EN = 0;
+  78   3           if(Show_Flag)
+  79   3           {
+  80   4           Pulse = 100;
+  81   4           Show_Flag = 0;
+  82   4          }
+  83   3         }    
+  84   2        if(Flag==1)
+  85   2         {
+  86   3           Show_String(0x85,"Auto");
+  87   3           if(Temp_Flag)
+  88   3           {
+  89   4             Flag = 0;
+  90   4             TR0 = 1;
+  91   4             TR1 = 1;
+  92   4           }
+  93   3         }
+  94   2      
+  95   2         if(Pulse == 100)
+  96   2            Show_String(0xc5,"-----");
+  97   2         else if((Pulse == 65) || (Pulse == 70))
+  98   2             Show_String(0xc5,"Small");
+  99   2         else if((Pulse == 35) || (Pulse == 30))
+ 100   2             Show_String(0xc5,"Midle");
+ 101   2         else if(Pulse == 0)
+ 102   2             Show_String(0xc5,"Large");
+ 103   2        }
+ 104   1      }
+*** WARNING C280 IN LINE 23 OF main.c: 'temparature': unreferenced local variable
+ 105          void exint0() interrupt 0           //(location at 0003H)
+ 106          {
+ 107   1          Led = 0;
+ 108   1      }
+ 109          
+ 110          void Timer_0(void) interrupt 1
+ 111          {
+ 112   1        static unsigned char Count = 0;
+ 113   1        Count++;
+ 114   1        if(Count > 100)
+ 115   1           Count = 0;
+ 116   1        if(Count <= Pulse)
+C51 COMPILER V9.57.0.0   MAIN                                                              04/28/2018 02:38:33 PAGE 3   
+
+ 117   1          Motor_EN = 0;
+ 118   1        else
+ 119   1          Motor_EN = 1;
+ 120   1      }
+ 121          void Timer_1(void) interrupt 3
+ 122          {
+ 123   1        static unsigned int count = 0; 
+ 124   1        TH1 = 0X3c;
+ 125   1        TL1 = 0Xb0;
+ 126   1        count++;
+ 127   1        if(count == 200)
+ 128   1        {
+ 129   2           count = 0;
+ 130   2         TR0 = 0;
+ 131   2         TR1 = 0;
+ 132   2         Pulse  = 100;
+ 133   2         Motor_EN = 0;
+ 134   2         Mode_Flag = 0;
+ 135   2         Show_String(0x85,"Manu       ");
+ 136   2        }
+ 137   1      }
+ 138          void GetShowTemp()
+ 139          {
+ 140   1          int temp;
+ 141   1          static unsigned char i =0;
+ 142   1          unsigned char str[4];
+ 143   1          
+ 144   1          if (Get18B20Temp(&temp))  //读取当前温度并判断是否成功
+ 145   1          {   //读取成功时，刷新当前温度显示
+ 146   2              if(!i)
+ 147   2              Delay1ms(1000);
+ 148   2              Get18B20Temp(&temp);
+ 149   2              temp >>= 4;  //右移4位以舍弃小数位
+ 150   2              str[0] = temp/10 + '0';  //显示为两位十进制数字
+ 151   2              str[1] = temp%10 + '0';
+ 152   2              str[2] = '\0';
+ 153   2              Show_String(0x8c, str);
+ 154   2              if(temp >= 80)
+ 155   2              {
+ 156   3                Temp_Flag  = 1;
+ 157   3                Relay = 0;
+ 158   3              }
+ 159   2                
+ 160   2              else 
+ 161   2              {
+ 162   3                Relay = 1;
+ 163   3              }
+ 164   2              i++;
+ 165   2              if(i>=100)
+ 166   2                i = 1;
+ 167   2          }
+ 168   1          else
+ 169   1          {   //读取失败时，提示错误信息
+ 170   2              Show_String(0x8c, "--");
+ 171   2          }
+ 172   1          Start18B20();  //重新启动下一次转换
+ 173   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    564    ----
+   CONSTANT SIZE    =     54    ----
+C51 COMPILER V9.57.0.0   MAIN                                                              04/28/2018 02:38:33 PAGE 4   
+
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      5       8
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      4       1
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

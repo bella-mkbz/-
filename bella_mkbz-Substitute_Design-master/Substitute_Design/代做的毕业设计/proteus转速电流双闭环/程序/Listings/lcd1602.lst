@@ -1,0 +1,92 @@
+C51 COMPILER V9.59.0.0   LCD1602                                                           05/09/2019 11:51:47 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE LCD1602
+OBJECT MODULE PLACED IN .\Objects\lcd1602.obj
+COMPILER INVOKED BY: D:\keil C51\C51\BIN\C51.EXE lcd1602.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\
+                    -lcd1602.lst) TABS(2) OBJECT(.\Objects\lcd1602.obj)
+
+line level    source
+
+   1          #include"lcd1602.h"
+   2          
+   3          //LCD上行显示函数
+   4             void lcd_display_L(unsigned char *a)
+   5             {
+   6   1            unsigned char i=0;
+   7   1          writecom(0x80);
+   8   1          for(i=0;a[i];i++)
+   9   1          writedat(a[i]);
+  10   1         }
+  11          
+  12            void lcd_display_Set(unsigned char *a)
+  13             {
+  14   1            unsigned char i=0;
+  15   1          writecom(0x8d);
+  16   1          for(i=0;a[i];i++)
+  17   1          writedat(a[i]);
+  18   1         }
+  19          
+  20            //LCD下行显示函数
+  21            void lcd_display_H(unsigned char *b)
+  22            {
+  23   1            unsigned char i=0;
+  24   1          writecom(0x80+0x40);
+  25   1          for(i=0;b[i];i++)
+  26   1          writedat(b[i]);
+  27   1        }
+  28          
+  29              //LCD延时函数
+  30             void delay10ms(unsigned char i)
+  31             {
+  32   1          for(i=0;i<100;i++);
+  33   1         }
+  34          
+  35             //LCD写命令
+  36             void writecom(unsigned char a)
+  37              {
+  38   1            rs=0;
+  39   1          rw=0;
+  40   1          P0=a;
+  41   1          delay10ms(100);
+  42   1          en=1;
+  43   1          delay10ms(100);
+  44   1          en=0;
+  45   1          }
+  46          
+  47             //LCD写数据
+  48            void writedat(unsigned char a)
+  49            {
+  50   1            rs=1;
+  51   1          rw=0;
+  52   1          P0=a;
+  53   1          delay10ms(1);
+  54   1          en=1;
+C51 COMPILER V9.59.0.0   LCD1602                                                           05/09/2019 11:51:47 PAGE 2   
+
+  55   1          delay10ms(1);
+  56   1          en=0;
+  57   1        }
+  58          
+  59             //LCD初始化
+  60            void lcdinit()
+  61            {
+  62   1          writecom(0x38);
+  63   1            writecom(0x0c);
+  64   1            writecom(0x06);
+  65   1          writecom(0x01); 
+  66   1        }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    207    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      12
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

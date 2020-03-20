@@ -1,0 +1,6 @@
+".\Objects\delay.obj",
+".\Objects\main.obj",
+".\Objects\uart.obj",
+".\Objects\temp.obj" 
+TO ".\Objects\pro" 
+PRINT(".\Listings\pro.m51") RAMSIZE(256) 

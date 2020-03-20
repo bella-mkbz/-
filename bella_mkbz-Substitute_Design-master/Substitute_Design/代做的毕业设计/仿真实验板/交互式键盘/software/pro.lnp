@@ -1,0 +1,6 @@
+"main.obj",
+"delay.obj",
+"lcd.obj",
+"Inter_Key.obj" 
+TO "pro" 
+RAMSIZE(256) 

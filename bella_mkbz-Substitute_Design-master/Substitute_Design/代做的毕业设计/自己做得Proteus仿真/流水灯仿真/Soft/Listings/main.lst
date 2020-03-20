@@ -1,0 +1,78 @@
+C51 COMPILER V9.56.0.0   MAIN                                                              09/16/2017 14:36:07 PAGE 1   
+
+
+C51 COMPILER V9.56.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include<reg51.h>
+   2          #include<intrins.h>
+   3          #include "delay.h"
+   4          
+   5          sbit ADDR_A=P2^0;
+   6          sbit ADDR_B=P2^1;
+   7          sbit ADDR_C=P2^2;
+   8          
+   9          sbit ADDR_E1=P2^3;
+  10          sbit ADDR_E2_3=P2^4;
+  11          
+  12          void Init(void);
+  13          
+  14          void main()
+  15          {
+  16   1        uint8_t Flag=0;
+  17   1        Init();
+  18   1        while(1)
+  19   1        {
+  20   2          if(!Flag)
+  21   2          {
+  22   3            P0=_cror_(P0,1);
+  23   3            Delay;
+  24   3            if(P0 == 0XFE)
+  25   3            {
+  26   4              Flag=1; 
+  27   4              P0=0Xef;
+  28   4              Delay;
+  29   4            }
+  30   3          }
+  31   2         else
+  32   2         {
+  33   3            P0=_crol_(P0,1);
+  34   3            Delay;
+  35   3                if(P0 == 0X7f)
+  36   3            {
+  37   4              Flag=0; 
+  38   4              P0=0Xef;
+  39   4              Delay;
+  40   4            }
+  41   3         }
+  42   2        }
+  43   1      }
+  44          void Init(void)
+  45          {
+  46   1        ADDR_A=0;
+  47   1        ADDR_B=ADDR_C=1;
+  48   1        ADDR_E1=1;
+  49   1        ADDR_E2_3=0;
+  50   1        P0=0Xef;
+  51   1        Delay;
+  52   1      }
+
+
+C51 COMPILER V9.56.0.0   MAIN                                                              09/16/2017 14:36:07 PAGE 2   
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    109    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       1
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

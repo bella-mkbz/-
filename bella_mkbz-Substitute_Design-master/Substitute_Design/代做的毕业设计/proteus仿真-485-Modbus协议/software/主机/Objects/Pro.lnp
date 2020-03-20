@@ -1,0 +1,6 @@
+".\Objects\main.obj",
+".\Objects\uart.obj",
+".\Objects\delay.obj",
+".\Objects\lcd.obj" 
+TO ".\Objects\Pro" 
+PRINT(".\Listings\Pro.m51") RAMSIZE(256) 

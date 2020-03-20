@@ -1,0 +1,224 @@
+C51 COMPILER V9.59.0.0   MAIN                                                              05/19/2019 18:30:55 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\keil C51\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\mai
+                    -n.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include "delay.h"
+   2          #include "uart.h"
+   3          #include "temp.h"
+   4          #include "string.h"
+   5          
+   6          sbit Relay_1 = P2^0;
+   7          sbit Relay_2 = P2^1;
+   8          sbit Relay_3 = P2^2;
+   9          sbit Relay_4 = P2^3;
+  10          
+  11          /*************************本地程序定义变量*****************************/
+  12          #define Buf2_Max 256                    // 串口2接收最大长度
+  13          bit Rec_Flag;                           // 串口2帧数据接收完成标志
+  14          unsigned char Rec_Len = 0;              // 串口2接收数据长度
+  15          xdata unsigned char Rec_Buff[Buf2_Max]; // 串口2接收数据缓冲区
+  16          unsigned char Datas_Buff[8]= {0, 0, 0, 0, 0, 0, 0,'\0'}; //存放温度数据
+  17          /*********************************************************************/
+  18          
+  19          /*************************本地函数定义********************************/
+  20          void Timer0Init(void);
+  21          void Timer1Init(void);  
+  22          void CLR_Buf2(void);
+  23          void Temp_Change(int temp,unsigned char* Buff);
+  24          /*********************************************************************/
+  25          
+  26          void main(void)
+  27          {
+  28   1          u8 i = 0;
+  29   1          Timer1Init(); 
+  30   1          Uart1Init();
+  31   1          Uart2Init();
+  32   1          delay_ms(1000);
+  33   1          EA = 1;
+  34   1          for(;;)
+  35   1          {
+  36   2            Temp_Change(Ds18b20ReadTemp(),Datas_Buff);
+  37   2            UART2_SendString(Datas_Buff);
+  38   2            if((Datas_Buff[2] - 0x30) >= 3 &&  (Datas_Buff[3] - 0x30) >= 0)
+  39   2              Relay_4 = 0;
+  40   2            else
+  41   2              Relay_4 = 1;
+  42   2            UART2_SendData(0x0d);
+  43   2            UART2_SendData(0x0a);
+  44   2            UART2_SendData(0x0d);
+  45   2            UART2_SendData(0x0a);
+  46   2            UART2_SendData(0x0d);
+  47   2            UART2_SendData(0x0a);
+  48   2            delay_ms(1000);
+  49   2          }
+  50   1      }
+  51          
+  52          void Uart2() interrupt 8
+  53          {
+  54   1          IE2  &= ~0x01;   //关闭串口2中断
+C51 COMPILER V9.59.0.0   MAIN                                                              05/19/2019 18:30:55 PAGE 2   
+
+  55   1          if (S2CON & S2RI)
+  56   1          {
+  57   2            S2CON &= ~S2RI;                 //清除S2RI位
+  58   2            ET1 = 0;                        //关闭定时器1中断
+  59   2            Rec_Buff[Rec_Len] = S2BUF;      //将接收到的字符串存到缓存中
+  60   2            Rec_Len++;                      //缓存指针向后移动
+  61   2            if(Rec_Len > Buf2_Max)          //如果缓存满,将缓存指针指向缓存的首地址
+  62   2            {
+  63   3              Rec_Len = 0;
+  64   3            }
+  65   2            TL1 = 0x00;   //设置定时初值
+  66   2            TH1 = 0xDC;   //设置定时初值
+  67   2            ET1 = 1;      //打开定时器1中断     
+  68   2          }
+  69   1          if (S2CON & S2TI)
+  70   1          {
+  71   2            S2CON &= ~S2TI;         //清除S2TI位
+  72   2          }
+  73   1          IE2  |= 0x01;   //使能串口2中断
+  74   1      }
+  75          
+  76          void Timer1() interrupt 3
+  77          {
+  78   1          static u8 i = 0;
+  79   1          TL1 = 0x00;   //设置定时初值
+  80   1          TH1 = 0xDC;   //设置定时初值
+  81   1          i++;
+  82   1          if(i == 10)
+  83   1          {
+  84   2            Rec_Flag = 1;
+  85   2            ET1 = 0;  
+  86   2            i = 0;    
+  87   2          }
+  88   1          if(Rec_Flag)
+  89   1          {
+  90   2            Rec_Flag = 0;
+  91   2            UART1_SendString(Rec_Buff);
+  92   2            if(strstr(Rec_Buff,"1on") != NULL)
+  93   2            {
+  94   3              Relay_1 = 0;
+  95   3            }
+  96   2            if(strstr(Rec_Buff,"2on") != NULL)
+  97   2            {
+  98   3              Relay_2 = 0;
+  99   3            }
+ 100   2            if(strstr(Rec_Buff,"3on") != NULL)
+ 101   2            {
+ 102   3              Relay_3 = 0;
+ 103   3            }
+ 104   2            if(strstr(Rec_Buff,"4on") != NULL)
+ 105   2            {
+ 106   3              Relay_4 = 0;
+ 107   3            }
+ 108   2            if(strstr(Rec_Buff,"All on") != NULL)
+ 109   2            {
+ 110   3              Relay_1 = 0;
+ 111   3              Relay_2 = 0;
+ 112   3              Relay_3 = 0;
+ 113   3              Relay_4 = 0;
+ 114   3            }
+ 115   2            if(strstr(Rec_Buff,"1off") != NULL)
+ 116   2            {
+C51 COMPILER V9.59.0.0   MAIN                                                              05/19/2019 18:30:55 PAGE 3   
+
+ 117   3              Relay_1 = 1;
+ 118   3            }
+ 119   2            if(strstr(Rec_Buff,"2off") != NULL)
+ 120   2            {
+ 121   3              Relay_2 = 1;
+ 122   3            }
+ 123   2            if(strstr(Rec_Buff,"3off") != NULL)
+ 124   2            {
+ 125   3              Relay_3 = 1;
+ 126   3            }
+ 127   2            if(strstr(Rec_Buff,"4off") != NULL)
+ 128   2            {
+ 129   3              Relay_4 = 1;
+ 130   3            }
+ 131   2            if(strstr(Rec_Buff,"All off") != NULL)
+ 132   2            {
+ 133   3              Relay_1 = 1;
+ 134   3              Relay_2 = 1;
+ 135   3              Relay_3 = 1;
+ 136   3              Relay_4 = 1;
+ 137   3            }
+ 138   2            CLR_Buf2();
+ 139   2          }
+ 140   1      }
+ 141          
+ 142          void Timer1Init(void)   //10毫秒@11.0592MHz
+ 143          {
+ 144   1          AUXR &= 0xBF;   //定时器时钟12T模式
+ 145   1          TMOD &= 0x0F;   //设置定时器模式
+ 146   1          TMOD |= 0x10;   //设置定时器模式
+ 147   1          TL1 = 0x00;   //设置定时初值
+ 148   1          TH1 = 0xDC;   //设置定时初值
+ 149   1          TF1 = 0;    //清除TF1标志
+ 150   1          TR1 = 1;    //定时器1开始计时
+ 151   1      }
+ 152          
+ 153          void CLR_Buf2(void)
+ 154          {
+ 155   1          u16 k;
+ 156   1          for(k=0;k<Buf2_Max;k++)      //将缓存内容清零
+ 157   1          {
+ 158   2            Rec_Buff[k] = 0x00;
+ 159   2          }
+ 160   1          Rec_Len = 0;              //接收字符串的起始存储位置
+ 161   1      }
+ 162          
+ 163          void Temp_Change(int temp,unsigned char* Buff)
+ 164          {
+ 165   1          float tp;  
+ 166   1          if(temp< 0)       //当温度值为负数
+ 167   1          {
+ 168   2            Buff[0] = '-';
+ 169   2          //因为读取的温度是实际温度的补码，所以减1，再取反求出原码
+ 170   2          temp=temp-1;
+ 171   2          temp=~temp;
+ 172   2          tp=temp;
+ 173   2          temp=tp*0.0625*100+0.5; 
+ 174   2          //留两个小数点就*100，+0.5是四舍五入，因为C语言浮点数转换为整型的时候把小数点
+ 175   2          //后面的数自动去掉，不管是否大于0.5，而+0.5之后大于0.5的就是进1了，小于0.5的就
+ 176   2          //算由?.5，还是在小数点后面。
+ 177   2          }
+ 178   1        else
+C51 COMPILER V9.59.0.0   MAIN                                                              05/19/2019 18:30:55 PAGE 4   
+
+ 179   1          { 
+ 180   2          Buff[0] = '+';      
+ 181   2          tp=temp;//因为数据处理有小数点所以将温度赋给一个浮点型变量
+ 182   2          //如果温度是正的那么，那么正数的原码就是补码它本身
+ 183   2          temp=tp*0.0625*100+0.5; 
+ 184   2          //留两个小数点就*100，+0.5是四舍五入，因为C语言浮点数转换为整型的时候把小数点
+ 185   2          //后面的数自动去掉，不管是否大于0.5，而+0.5之后大于0.5的就是进1了，小于0.5的就
+ 186   2          //算加上0.5，还是在小数点后面。
+ 187   2          }
+ 188   1        Buff[1] = temp / 10000 + 0x30;
+ 189   1        Buff[2] = temp % 10000 / 1000 + 0x30;
+ 190   1        Buff[3] = temp % 1000 / 100 + 0x30;
+ 191   1        Buff[4] = '.';  
+ 192   1        Buff[5] = temp % 100 / 10 + 0x30;
+ 193   1        Buff[6] = temp % 10 + 0x30;
+ 194   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    874    ----
+   CONSTANT SIZE    =     51    ----
+   XDATA SIZE       =    256    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     10      10
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

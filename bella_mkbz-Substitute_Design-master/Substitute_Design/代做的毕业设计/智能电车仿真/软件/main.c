@@ -1,0 +1,85 @@
+#include<reg51.h>
+#include<intrins.h>
+#include "delay.h"
+#include "button.h"
+#include "lcd.h"
+#include "ADC0832.h"
+
+sbit Motor_A  =  P1^5;
+sbit Motor_B  =  P1^6;
+sbit Motor_EN =  P1^7;
+
+
+static int Pulse = 100;
+float Scale;
+float V;
+unsigned char A;
+
+void main()
+{ 
+  unsigned char temp;
+	
+  Motor_A = 1;
+  Motor_B = 0;
+  Motor_EN = 0;
+  TMOD = 0X02;
+  TH0 = 0X74;
+  TL0 = 0X74;
+  EA = 1;
+  ET0 = 0;
+  TR0 = 0;  
+  EX0 = 1;
+  IT0 = 1;	
+  LcdInit();	
+	Show_String(0xc0,"Current: ");
+	Show_String(0x80,"Voltage: ");
+  Show_String(0x8e,"mV");
+	Show_String(0xCE,"mA");
+  while(1)
+  {
+		Show_Dec_Number(0X8a,(unsigned int)(((adc0832(0) - 1)/51.0)*1000.0));		
+		Scale = (adc0832(0) / 255.0)*100.0;
+		Pulse = 100 - (unsigned char)Scale; 
+		//V = (((float)adc0832(1) - 1)/255)*5.0;
+		V = ((float)adc0832(1)/255)*5.0;
+		A = V * 20;
+		Show_Dec_Number(0XCa,A);
+    temp = Button_Value();
+		switch (temp)
+    {
+    	case 1:
+				ET0 = 1;
+        TR0 = 1;
+				Motor_A = 1;
+        Motor_B = 0;
+    		break;
+    	default:
+    		break;
+
+    }
+		
+		
+  }
+}
+
+void exint0() interrupt 0           //(location at 0003H)
+{
+    		ET0 = 0;
+        TR0 = 0;
+			  Motor_A = 1;
+        Motor_B = 1;
+} 
+
+void Timer_0(void) interrupt 1
+{
+  static unsigned char Count = 0;
+  Count++;
+  if(Count > 100)
+     Count = 0;
+  if(Count <= Pulse)
+	  Motor_EN = 0;
+  else
+	  Motor_EN = 1;
+}
+
+

@@ -1,0 +1,49 @@
+C51 COMPILER V9.59.0.0   MAIN                                                              02/03/2019 16:22:15 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\keil C51\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\mai
+                    -n.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <STC12C5A60S2.H>
+   2          #include <intrins.h>
+   3          #include "DHT11.h"
+   4          
+   5          unsigned char Sensor_Data[5]={0x00};
+   6          
+   7          void main(void)
+   8          {
+   9   1         unsigned char i;
+  10   1         InitUART();
+  11   1         while(1)
+  12   1         {
+  13   2            if(Read_Sensor(Sensor_Data))
+  14   2            {
+  15   3              for(i=0;i<5;i++)
+  16   3               {
+  17   4                 SBUF = Sensor_Data[i];
+  18   4                 while(!TI);
+  19   4                 TI=0;
+  20   4               } 
+  21   3            }
+  22   2           Delay1000ms();
+  23   2         }
+  24   1         
+  25   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     47    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      5    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

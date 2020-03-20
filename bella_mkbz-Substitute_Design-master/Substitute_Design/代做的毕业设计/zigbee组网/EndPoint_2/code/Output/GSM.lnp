@@ -1,0 +1,6 @@
+"..\Output\delay.obj",
+"..\Output\uart.obj",
+"..\Output\temp.obj",
+"..\Output\main.obj" 
+TO "..\Output\GSM" 
+PRINT("..\Listing\GSM.m51") RAMSIZE(256) 

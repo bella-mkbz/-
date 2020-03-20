@@ -1,0 +1,247 @@
+C51 COMPILER V9.56.0.0   SLAVE                                                             10/12/2017 01:36:54 PAGE 1   
+
+
+C51 COMPILER V9.56.0.0, COMPILATION OF MODULE SLAVE
+OBJECT MODULE PLACED IN .\Objects\SLAVE.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE SLAVE.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\SLA
+                    -VE.lst) TABS(2) OBJECT(.\Objects\SLAVE.obj)
+
+line level    source
+
+   1          //FIRMWARE FOR SLAVE
+   2          #include <reg52.h>
+   3          #include <intrins.h>
+   4          
+   5          #define Uint16 unsigned int
+   6          #define Uint32 unsigned long
+   7          #define uchar  unsigned char
+   8          
+   9          sbit nodesel0=P3^2;
+  10          sbit nodesel1=P3^3;
+  11          sbit rw=P3^4;
+  12          
+  13          void InitUART(void);
+  14          void SendOneByte(unsigned);
+  15          void mdproc(uchar);
+  16          
+  17          Uint16 Crc16(Uint16 *puchMsg, Uint16 usDataLen); 
+  18          
+  19          uchar node;
+  20          uchar mtx[11]={0},mrx[10]={0};
+  21          
+  22          // modbus protocal defination below :
+  23          uchar byterev;
+  24          bit nodeok;
+  25          uchar revptr;
+  26          bit crcok;
+  27          Uint16 delaycnt;
+  28          
+  29          /* CRC 高位字节值表 */ 
+  30          const Uint16 code auchCRCHi[] = { 
+  31          0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 
+  32          0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 
+  33          0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 
+  34          0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 
+  35          0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 
+  36          0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 
+  37          0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 
+  38          0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 
+  39          0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 
+  40          0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 
+  41          0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 
+  42          0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 
+  43          0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 
+  44          0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 
+  45          0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 
+  46          0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 
+  47          0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 
+  48          0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 
+  49          0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 
+  50          0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 
+  51          0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 
+  52          0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 
+  53          0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 
+  54          0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 
+C51 COMPILER V9.56.0.0   SLAVE                                                             10/12/2017 01:36:54 PAGE 2   
+
+  55          0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 
+  56          0x80, 0x41, 0x00, 0xC1, 0x81, 0x40 
+  57          } ; 
+  58          
+  59          /* CRC低位字节值表*/ 
+  60          const Uint16 code auchCRCLo[] = { 
+  61          0x00, 0xC0, 0xC1, 0x01, 0xC3, 0x03, 0x02, 0xC2, 0xC6, 0x06, 
+  62          0x07, 0xC7, 0x05, 0xC5, 0xC4, 0x04, 0xCC, 0x0C, 0x0D, 0xCD, 
+  63          0x0F, 0xCF, 0xCE, 0x0E, 0x0A, 0xCA, 0xCB, 0x0B, 0xC9, 0x09, 
+  64          0x08, 0xC8, 0xD8, 0x18, 0x19, 0xD9, 0x1B, 0xDB, 0xDA, 0x1A, 
+  65          0x1E, 0xDE, 0xDF, 0x1F, 0xDD, 0x1D, 0x1C, 0xDC, 0x14, 0xD4, 
+  66          0xD5, 0x15, 0xD7, 0x17, 0x16, 0xD6, 0xD2, 0x12, 0x13, 0xD3, 
+  67          0x11, 0xD1, 0xD0, 0x10, 0xF0, 0x30, 0x31, 0xF1, 0x33, 0xF3, 
+  68          0xF2, 0x32, 0x36, 0xF6, 0xF7, 0x37, 0xF5, 0x35, 0x34, 0xF4, 
+  69          0x3C, 0xFC, 0xFD, 0x3D, 0xFF, 0x3F, 0x3E, 0xFE, 0xFA, 0x3A, 
+  70          0x3B, 0xFB, 0x39, 0xF9, 0xF8, 0x38, 0x28, 0xE8, 0xE9, 0x29, 
+  71          0xEB, 0x2B, 0x2A, 0xEA, 0xEE, 0x2E, 0x2F, 0xEF, 0x2D, 0xED, 
+  72          0xEC, 0x2C, 0xE4, 0x24, 0x25, 0xE5, 0x27, 0xE7, 0xE6, 0x26, 
+  73          0x22, 0xE2, 0xE3, 0x23, 0xE1, 0x21, 0x20, 0xE0, 0xA0, 0x60, 
+  74          0x61, 0xA1, 0x63, 0xA3, 0xA2, 0x62, 0x66, 0xA6, 0xA7, 0x67, 
+  75          0xA5, 0x65, 0x64, 0xA4, 0x6C, 0xAC, 0xAD, 0x6D, 0xAF, 0x6F, 
+  76          0x6E, 0xAE, 0xAA, 0x6A, 0x6B, 0xAB, 0x69, 0xA9, 0xA8, 0x68, 
+  77          0x78, 0xB8, 0xB9, 0x79, 0xBB, 0x7B, 0x7A, 0xBA, 0xBE, 0x7E, 
+  78          0x7F, 0xBF, 0x7D, 0xBD, 0xBC, 0x7C, 0xB4, 0x74, 0x75, 0xB5, 
+  79          0x77, 0xB7, 0xB6, 0x76, 0x72, 0xB2, 0xB3, 0x73, 0xB1, 0x71, 
+  80          0x70, 0xB0, 0x50, 0x90, 0x91, 0x51, 0x93, 0x53, 0x52, 0x92, 
+  81          0x96, 0x56, 0x57, 0x97, 0x55, 0x95, 0x94, 0x54, 0x9C, 0x5C, 
+  82          0x5D, 0x9D, 0x5F, 0x9F, 0x9E, 0x5E, 0x5A, 0x9A, 0x9B, 0x5B, 
+  83          0x99, 0x59, 0x58, 0x98, 0x88, 0x48, 0x49, 0x89, 0x4B, 0x8B, 
+  84          0x8A, 0x4A, 0x4E, 0x8E, 0x8F, 0x4F, 0x8D, 0x4D, 0x4C, 0x8C, 
+  85          0x44, 0x84, 0x85, 0x45, 0x87, 0x47, 0x46, 0x86, 0x82, 0x42, 
+  86          0x43, 0x83, 0x41, 0x81, 0x80, 0x40 
+  87          } ;
+  88          
+  89          void main(void)
+  90          {
+  91   1        Uint16 temp16;
+  92   1        int i;
+  93   1        crcok=0;
+  94   1        nodeok=0;
+  95   1        for(i=0;i<10;i++){mrx[i]=0x00;}
+  96   1        for(i=0;i<11;i++){mtx[i]=0x00;}
+  97   1      
+  98   1        node=!nodesel1;
+  99   1        node<<=1;
+ 100   1        node|=!nodesel0;  //SLAVE node is determine by the jumper set
+ 101   1        InitUART();
+ 102   1        rw=0;  //accroding to the MAX485 IC, /RE=1 means transfering ,and /RE=0 means receiving ,after INIT ,defa
+             -ult state is receiving for SLAVE
+ 103   1        
+ 104   1        while(1)
+ 105   1        { 
+ 106   2          if(crcok == 1)  //plugin the time delay in the communication for monitoring easily in proteus
+ 107   2          { 
+ 108   3            
+ 109   3            mtx[0]=mrx[0]; 
+ 110   3            mtx[1]=mrx[1];
+ 111   3            mtx[2]=mrx[5]*2;
+ 112   3            mtx[3]=0;
+ 113   3            mtx[4]=127;
+ 114   3            temp16=Crc16(mtx,5);
+*** WARNING C182 IN LINE 114 OF SLAVE.c: pointer to different objects
+C51 COMPILER V9.56.0.0   SLAVE                                                             10/12/2017 01:36:54 PAGE 3   
+
+ 115   3            mtx[5]=(temp16>>8)&0x00ff;
+ 116   3            mtx[6]=temp16&0x00ff;
+ 117   3      
+ 118   3            delaycnt=0x3fff;
+ 119   3            while(delaycnt--){}
+ 120   3            rw=1;
+ 121   3            delaycnt=0x3ff;
+ 122   3            while(delaycnt--){}
+ 123   3            for(i=0;i<7;i++)
+ 124   3            { 
+ 125   4              SendOneByte(mtx[i]);
+ 126   4            }
+ 127   3            crcok=0;
+ 128   3            delaycnt=0x3ff;
+ 129   3            while(delaycnt--){}
+ 130   3            rw=0;
+ 131   3          }     
+ 132   2        }
+ 133   1      }
+ 134          
+ 135          Uint16 Crc16(uchar *puchMsg, Uint16 usDataLen) 
+ 136          { 
+*** WARNING C235 IN LINE 136 OF SLAVE.c: parameter 1: different types
+ 137   1        Uint16 uchCRCHi = 0xFF ;              /* 高CRC字节初始化  */ 
+ 138   1        Uint16 uchCRCLo = 0xFF ;              /* 低CRC 字节初始化 */ 
+ 139   1        Uint16 temp16;
+ 140   1        Uint32 uIndex ;                      /* CRC循环中的索引  */ 
+ 141   1        while (usDataLen--)                  /* 传输消息缓冲区   */ 
+ 142   1        { 
+ 143   2          temp16=*puchMsg++;
+ 144   2          uIndex = uchCRCHi ^ temp16 ; /* 计算CRC          */ 
+ 145   2          uchCRCHi = uchCRCLo ^ auchCRCHi[uIndex] ; 
+ 146   2          uchCRCLo = auchCRCLo[uIndex] ; 
+ 147   2        } 
+ 148   1        return (uchCRCHi << 8 | uchCRCLo) ; 
+ 149   1      }
+ 150          
+ 151          void UARTInterrupt(void) interrupt 4
+ 152          {
+ 153   1          if(RI)
+ 154   1          {
+ 155   2              RI = 0;
+ 156   2              byterev=SBUF;
+ 157   2              mdproc(byterev);
+ 158   2          }
+ 159   1          else
+ 160   1              TI = 0;
+ 161   1      }
+ 162          
+ 163          void mdproc(uchar b)  //the simply MODBUS 04 command processing ,if node is right , then receive the whole
+             - frame and cheak the CRC , if CRC is OK ,then reply data to the HOST
+ 164          { 
+ 165   1        Uint16 temp16_1,temp16_2;
+ 166   1        if(nodeok==0)
+ 167   1        { 
+ 168   2          if(b==node)
+ 169   2          { 
+ 170   3            nodeok=1;
+ 171   3            mrx[0]=b;
+ 172   3            revptr=1;
+ 173   3          }
+ 174   2        }
+C51 COMPILER V9.56.0.0   SLAVE                                                             10/12/2017 01:36:54 PAGE 4   
+
+ 175   1        else
+ 176   1        { 
+ 177   2          mrx[revptr++]=b;
+ 178   2          if(revptr==8)
+ 179   2          { 
+ 180   3            nodeok=0;
+ 181   3            temp16_1=Crc16(mrx,6);
+ 182   3            temp16_2=mrx[6];
+ 183   3            temp16_2<<=8;
+ 184   3            temp16_2|=mrx[7];
+ 185   3            if(temp16_1==temp16_2)
+ 186   3              crcok=1;
+ 187   3          }
+ 188   2        }
+ 189   1      }
+ 190          
+ 191          void SendOneByte(unsigned char c)
+ 192          {
+*** WARNING C235 IN LINE 192 OF SLAVE.c: parameter 1: different types
+ 193   1          SBUF = c;
+ 194   1          while(!TI);
+ 195   1          TI = 0;
+ 196   1      }
+ 197          
+ 198          
+ 199          void InitUART(void)
+ 200          {
+ 201   1          TMOD = 0x20;
+ 202   1          SCON = 0x50;
+ 203   1          TH1 = 0xFD;
+ 204   1          TL1 = TH1;
+ 205   1          PCON = 0x00;
+ 206   1          EA = 1;
+ 207   1          ES = 1;
+ 208   1          TR1 = 1;
+ 209   1      }
+ 210          
+ 211          
+ 212          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    542    ----
+   CONSTANT SIZE    =   1024    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     26      15
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      2    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  3 WARNING(S),  0 ERROR(S)

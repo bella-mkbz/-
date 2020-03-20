@@ -1,0 +1,43 @@
+PAHO MQTT客户端
+wireshark 抓包工具
+测试使用客户端ID ：motu
+订阅Topic : zxc
+
+connect : 10 10 00 04 4d 51 54 54 04 02 00 3c 00 04 6d 6f 74 75
+          Header Flags(10) -- Msg Len(10) -- Protocol Name Len(00 04) -- Protocol Name(4d 51 54 54)          
+          --MQTT Version(04)--QOS Level(02)--Keep Alive(00 3c)--Client ID Len(00 04)--Client ID(6d 6f 74 75) 
+connect ack : 20 02 00 00
+              Header Flags(20)-- Msg Len(02)--Acknowledge Flags(00)--Return Code: Connection Accepted (00) 
+
+
+subscrib : 82 08 00 02 00 03 7a 78 63 00
+           Header Flags(82)--Msg Len(08)--Message Identifier(00 02)--Topic Length(00 03)
+           --Topic(7a 78 63)--Requested QoS(00)
+                             Requested QoS
+               QoS Level 0        00
+               QoS Level 1        01 
+               QoS Level 2        02
+subscrib ack : 90 03 00 02 00
+               Header Flags(90)--Msg Len(03)--Message Identifier(00 02)--Granted QoS 2 (01)
+
+
+Receive Publish Msg : 30 08 00 03 7a 78 63 61 62 63
+                      Header Flags(30)--Msg Len(08)--Topic Length(00 03)--Topic(7a 78 63)--Receive Message(61 62 63)
+
+
+Publish Topic Msg : 30 09 00 04 74 65 73 74 31 32 33
+                    Header Flags(30)--Msg Len(09)--Topic Length(00 04)--Topic(74 65 73 74)--Send Message(31 32 33)
+
+
+Ping Request(心跳包) : c0 00 
+                       Header Flags(c0) -- Msg Len(0)
+Ping Response        : d0 00 
+                       Header Flags(d0) -- Msg Len(0)
+
+
+disconnect : e0 00 
+             Header Flags(e0) -- Msg Len(0)
+
+33 0A 00 03 7A 78 63 00 01 61 62 63 
+3B 0A 00 03 7A 78 00 01 61 63 63 
+3B 0A 00 03 7A 63 00 01 61 62 

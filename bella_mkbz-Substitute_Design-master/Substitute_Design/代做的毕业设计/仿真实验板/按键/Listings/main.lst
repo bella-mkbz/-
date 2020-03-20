@@ -1,0 +1,84 @@
+C51 COMPILER V9.56.0.0   MAIN                                                              10/16/2017 19:37:20 PAGE 1   
+
+
+C51 COMPILER V9.56.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include<reg51.h>
+   2          #include "delay.h"
+   3          #include "button.h"
+   4          
+   5          sbit ADDR0 = P1^0;
+   6          sbit ADDR1 = P1^1;
+   7          sbit ADDR2 = P1^2;
+   8          sbit ADDR3 = P1^3;
+   9          sbit ENLED = P1^4;
+  10          sbit KEY0 = P2^2;
+  11          sbit KEY1 = P2^3;
+  12          
+  13          /***********定义全局变量**************/
+  14          uint8_t code Duan[]={0xff, 0xF9, 0xA4, 0xB0, 0x99, 0x92, 0x82, 0xF8,
+  15          0x80, 0x90, 0x88, 0x83, 0xC6, 0xA1, 0x86, 0x8E};
+  16          
+  17          void main(void)
+  18          {
+  19   1        static uint8_t temp;
+  20   1        uint8_t i=0,j=0;
+  21   1        ADDR3 = 1;
+  22   1        ENLED = 0;
+  23   1        KEY0 = 0;
+  24   1        KEY1 = 0;
+  25   1        while(1)
+  26   1        {
+  27   2           switch (i)
+  28   2              {
+  29   3                case 0: ADDR2=0; ADDR1=0; ADDR0=0; i++; P0=Duan[0];      Delay1ms(1); break;
+  30   3                case 1: ADDR2=0; ADDR1=0; ADDR0=1; i++; P0=Duan[0];      Delay1ms(1); break;
+  31   3                case 2: ADDR2=0; ADDR1=1; ADDR0=0; i++; P0=Duan[0];      Delay1ms(1); break;
+  32   3                case 3: ADDR2=0; ADDR1=1; ADDR0=1; i++; P0=Duan[j/100];  Delay1ms(1); break;
+  33   3                case 4: 
+  34   3                ADDR2=1; ADDR1=0; ADDR0=0; i++; 
+  35   3                if((j%100/10 == 0) && (j > 9))
+  36   3                   P0=0xc0;
+  37   3                else  
+  38   3                   P0=Duan[j%100/10];   
+  39   3                Delay1ms(1); break;
+  40   3                case 5: 
+  41   3                ADDR2=1; ADDR1=0; ADDR0=1; i=0; 
+  42   3                if((j%10 == 0) && (j != 0))
+  43   3                   P0=0xc0;
+  44   3                else          
+  45   3                   P0=Duan[j%10];       
+  46   3                Delay1ms(1); break;
+  47   3                
+  48   3                default: break;
+  49   3              }
+  50   2          temp = Button_Value();
+  51   2          switch (temp)
+  52   2          {
+  53   3            case 1:j++;break;
+  54   3            case 2:j--;break;
+C51 COMPILER V9.56.0.0   MAIN                                                              10/16/2017 19:37:20 PAGE 2   
+
+  55   3            default:break;
+  56   3          }
+  57   2        }
+  58   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    201    ----
+   CONSTANT SIZE    =     16    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      1       2
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

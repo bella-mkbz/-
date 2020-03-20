@@ -1,0 +1,106 @@
+C51 COMPILER V9.60.0.0   ADC0832                                                           03/13/2020 11:39:29 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE ADC0832
+OBJECT MODULE PLACED IN ADC0832.OBJ
+COMPILER INVOKED BY: D:\software install\Keil_C51\C51\BIN\C51.EXE ADC0832.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND 
+                    -TABS(2)
+
+line level    source
+
+   1          #include "ADC0832.h"
+   2          
+   3          unsigned char dat;
+   4          
+   5          unsigned char adc0832(unsigned char CH)
+   6          {
+   7   1        unsigned char i,test,adval;
+   8   1           adval = 0x00;
+   9   1           test = 0x00;
+  10   1           Clk = 0;       //初始化
+  11   1           DATI = 1;
+  12   1          _nop_();
+  13   1          CS = 0;
+  14   1          _nop_();
+  15   1          Clk = 1;
+  16   1         _nop_();
+  17   1         if ( CH == 0x00 )      //通道选择
+  18   1         {
+  19   2             Clk = 0;
+  20   2             DATI = 1;      //通道0的第一位
+  21   2             _nop_();
+  22   2            Clk = 1;
+  23   2              _nop_();
+  24   2              Clk = 0;
+  25   2            DATI = 0;      //通道0的第二位
+  26   2            _nop_();
+  27   2            Clk = 1;
+  28   2            _nop_();
+  29   2          } 
+  30   1          else
+  31   1          {
+  32   2             Clk = 0;
+  33   2            DATI = 1;      //通道1的第一位
+  34   2             _nop_();
+  35   2             Clk = 1;
+  36   2             _nop_();
+  37   2            Clk = 0;
+  38   2            DATI = 1;      //通道1的第二位
+  39   2          _nop_();
+  40   2           Clk = 1;
+  41   2           _nop_();
+  42   2          }
+  43   1            Clk = 0;
+  44   1            DATI = 1;
+  45   1          for( i = 0;i < 8;i++ )      //读取前8位的值
+  46   1          {
+  47   2             _nop_();
+  48   2             adval <<= 1;
+  49   2             Clk = 1;
+  50   2             _nop_();
+  51   2             Clk = 0;
+  52   2             if (DATO)
+  53   2                adval |= 0x01;
+  54   2            else
+C51 COMPILER V9.60.0.0   ADC0832                                                           03/13/2020 11:39:29 PAGE 2   
+
+  55   2                adval |= 0x00;
+  56   2          }
+  57   1            for (i = 0; i < 8; i++)      //读取后8位的值
+  58   1            {
+  59   2                 test >>= 1;
+  60   2                 if (DATO)
+  61   2                    test |= 0x80;
+  62   2                 else 
+  63   2                    test |= 0x00;
+  64   2                _nop_();
+  65   2                Clk = 1;
+  66   2                _nop_();
+  67   2                Clk = 0;
+  68   2            }
+  69   1            if (adval == test)      //比较前8位与后8位的值，如果不相同舍去。若一直出现显
+             -示为零，请将该行去掉
+  70   1                 dat = test;
+  71   1            _nop_();
+  72   1             CS = 1;        //释放ADC0832
+  73   1             DATO = 1;
+  74   1             Clk = 1;
+  75   1            return dat;
+  76   1      } 
+  77            
+  78              
+  79            
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    133    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      1    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

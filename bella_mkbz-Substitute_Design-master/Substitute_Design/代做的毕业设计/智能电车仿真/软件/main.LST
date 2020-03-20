@@ -1,0 +1,110 @@
+C51 COMPILER V9.59.0.0   MAIN                                                              02/17/2019 22:14:06 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: D:\keil C51\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND TABS(2)
+
+line level    source
+
+   1          #include<reg51.h>
+   2          #include<intrins.h>
+   3          #include "delay.h"
+   4          #include "button.h"
+   5          #include "lcd.h"
+   6          #include "ADC0832.h"
+   7          
+   8          sbit Motor_A  =  P1^5;
+   9          sbit Motor_B  =  P1^6;
+  10          sbit Motor_EN =  P1^7;
+  11          
+  12          
+  13          static int Pulse = 100;
+  14          float Scale;
+  15          float V;
+  16          unsigned char A;
+  17          
+  18          void main()
+  19          { 
+  20   1        unsigned char temp;
+  21   1        
+  22   1        Motor_A = 1;
+  23   1        Motor_B = 0;
+  24   1        Motor_EN = 0;
+  25   1        TMOD = 0X02;
+  26   1        TH0 = 0X74;
+  27   1        TL0 = 0X74;
+  28   1        EA = 1;
+  29   1        ET0 = 0;
+  30   1        TR0 = 0;  
+  31   1        EX0 = 1;
+  32   1        IT0 = 1;  
+  33   1        LcdInit();  
+  34   1        Show_String(0xc0,"Current: ");
+  35   1        Show_String(0x80,"Voltage: ");
+  36   1        Show_String(0x8e,"mV");
+  37   1        Show_String(0xCE,"mA");
+  38   1        while(1)
+  39   1        {
+  40   2          Show_Dec_Number(0X8a,(unsigned int)(((adc0832(0) - 1)/51.0)*1000.0));   
+  41   2          Scale = (adc0832(0) / 255.0)*100.0;
+  42   2          Pulse = 100 - (unsigned char)Scale; 
+  43   2          //V = (((float)adc0832(1) - 1)/255)*5.0;
+  44   2          V = ((float)adc0832(1)/255)*5.0;
+  45   2          A = V * 20;
+  46   2          Show_Dec_Number(0XCa,A);
+  47   2          temp = Button_Value();
+  48   2          switch (temp)
+  49   2          {
+  50   3            case 1:
+  51   3              ET0 = 1;
+  52   3              TR0 = 1;
+  53   3              Motor_A = 1;
+  54   3              Motor_B = 0;
+  55   3              break;
+C51 COMPILER V9.59.0.0   MAIN                                                              02/17/2019 22:14:06 PAGE 2   
+
+  56   3            default:
+  57   3              break;
+  58   3      
+  59   3          }
+  60   2          
+  61   2          
+  62   2        }
+  63   1      }
+  64          
+  65          void exint0() interrupt 0           //(location at 0003H)
+  66          {
+  67   1              ET0 = 0;
+  68   1              TR0 = 0;
+  69   1              Motor_A = 1;
+  70   1              Motor_B = 1;
+  71   1      } 
+  72          
+  73          void Timer_0(void) interrupt 1
+  74          {
+  75   1        static unsigned char Count = 0;
+  76   1        Count++;
+  77   1        if(Count > 100)
+  78   1           Count = 0;
+  79   1        if(Count <= Pulse)
+  80   1          Motor_EN = 0;
+  81   1        else
+  82   1          Motor_EN = 1;
+  83   1      }
+  84          
+  85          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    327    ----
+   CONSTANT SIZE    =     26    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     12    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

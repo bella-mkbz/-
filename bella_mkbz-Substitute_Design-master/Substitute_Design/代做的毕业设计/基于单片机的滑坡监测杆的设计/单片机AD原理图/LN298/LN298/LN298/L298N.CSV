@@ -1,0 +1,11 @@
+"Bill of Material for L298N.PcbDoc"
+"On 2014-11-13 at 16:52:43"
+
+"Comment","Pattern","Quantity","Components"
+
+"","SIP2","1","J1",""
+"","XH2.54-2P","2","J3, J4",""
+"16V/220uf","RB5/8","2","C1, C2","Polarized Capacitor (Radial)"
+"1N4007","Diode0.3","8","D5, D6, D7, D8, D9, D10, D11, D12","1 Amp General Purpose Rectifier"
+"CN2","SIP2","1","J2",""
+"LM7812","L298N…¢»»∆¨","1","","Voltage Regulator"

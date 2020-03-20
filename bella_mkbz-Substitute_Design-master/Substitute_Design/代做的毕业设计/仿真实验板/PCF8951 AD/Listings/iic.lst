@@ -1,0 +1,199 @@
+C51 COMPILER V9.57.0.0   IIC                                                               11/13/2018 14:55:13 PAGE 1   
+
+
+C51 COMPILER V9.57.0.0, COMPILATION OF MODULE IIC
+OBJECT MODULE PLACED IN .\Objects\iic.obj
+COMPILER INVOKED BY: D:\mdk\C51\BIN\C51.EXE iic.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\iic.lst) 
+                    -TABS(2) OBJECT(.\Objects\iic.obj)
+
+line level    source
+
+   1          #include "iic.h"
+   2          #include<intrins.h>
+   3          #define I2CDelay()  {_nop_();_nop_();_nop_();_nop_();}
+   4          
+   5          uchar ChipAdress = 0x90;
+   6          /* 产生总线起始信号 */
+   7          void I2CStart()
+   8          {
+   9   1          I2C_SDA = 1; //首先确保SDA、SCL都是高电平
+  10   1          I2C_SCL = 1;
+  11   1          I2CDelay();
+  12   1          I2C_SDA = 0; //先拉低SDA
+  13   1          I2CDelay();
+  14   1          I2C_SCL = 0; //再拉低SCL
+  15   1      }
+  16          /* 产生总线停止信号 */
+  17          void I2CStop()
+  18          {
+  19   1          I2C_SCL = 0; //首先确保SDA、SCL都是低电平
+  20   1          I2C_SDA = 0;
+  21   1          I2CDelay();
+  22   1          I2C_SCL = 1; //先拉高SCL
+  23   1          I2CDelay();
+  24   1          I2C_SDA = 1; //再拉高SDA
+  25   1          I2CDelay();
+  26   1      }
+  27          /* I2C总线写操作，dat-待写入字节，返回值-从机应答位的值 */
+  28          bit I2CWrite(unsigned char dat)
+  29          {
+  30   1          bit ack;  //用于暂存应答位的值
+  31   1          unsigned char mask;  //用于探测字节内某一位值的掩码变量
+  32   1      
+  33   1          for (mask=0x80; mask!=0; mask>>=1) //从高位到低位依次进行
+  34   1          {
+  35   2              if ((mask&dat) == 0)  //该位的值输出到SDA上
+  36   2                  I2C_SDA = 0;
+  37   2              else
+  38   2                  I2C_SDA = 1;
+  39   2              I2CDelay();
+  40   2              I2C_SCL = 1;          //拉高SCL
+  41   2              I2CDelay();
+  42   2              I2C_SCL = 0;          //再拉低SCL，完成一个位周期
+  43   2          }
+  44   1          I2C_SDA = 1;   //8位数据发送完后，主机释放SDA，以检测从机应答
+  45   1          I2CDelay();
+  46   1          I2C_SCL = 1;   //拉高SCL
+  47   1          ack = I2C_SDA; //读取此时的SDA值，即为从机的应答值
+  48   1          I2CDelay();
+  49   1          I2C_SCL = 0;   //再拉低SCL完成应答位，并保持住总线
+  50   1      
+  51   1          return (~ack); //应答值取反以符合通常的逻辑：
+  52   1                         //0=不存在或忙或写入失败，1=存在且空闲或写入成功
+  53   1      }
+  54          /* I2C总线读操作，并发送非应答信号，返回值-读到的字节 */
+C51 COMPILER V9.57.0.0   IIC                                                               11/13/2018 14:55:13 PAGE 2   
+
+  55          unsigned char I2CReadNAK()
+  56          {
+  57   1          unsigned char mask;
+  58   1          unsigned char dat;
+  59   1      
+  60   1          I2C_SDA = 1;  //首先确保主机释放SDA
+  61   1          for (mask=0x80; mask!=0; mask>>=1) //从高位到低位依次进行
+  62   1          {
+  63   2              I2CDelay();
+  64   2              I2C_SCL = 1;      //拉高SCL
+  65   2              if(I2C_SDA == 0)  //读取SDA的值
+  66   2                  dat &= ~mask; //为0时，dat中对应位清零
+  67   2              else
+  68   2                  dat |= mask;  //为1时，dat中对应位置1
+  69   2              I2CDelay();
+  70   2              I2C_SCL = 0;      //再拉低SCL，以使从机发送出下一位
+  71   2          }
+  72   1          I2C_SDA = 1;   //8位数据发送完后，拉高SDA，发送非应答信号
+  73   1          I2CDelay();
+  74   1          I2C_SCL = 1;   //拉高SCL
+  75   1          I2CDelay();
+  76   1          I2C_SCL = 0;   //再拉低SCL完成非应答位，并保持住总线
+  77   1      
+  78   1          return dat;
+  79   1      }
+  80          /* I2C总线读操作，并发送应答信号，返回值-读到的字节 */
+  81          unsigned char I2CReadACK()
+  82          {
+  83   1          unsigned char mask;
+  84   1          unsigned char dat;
+  85   1      
+  86   1          I2C_SDA = 1;  //首先确保主机释放SDA
+  87   1          for (mask=0x80; mask!=0; mask>>=1) //从高位到低位依次进行
+  88   1          {
+  89   2              I2CDelay();
+  90   2              I2C_SCL = 1;      //拉高SCL
+  91   2              if(I2C_SDA == 0)  //读取SDA的值
+  92   2                  dat &= ~mask; //为0时，dat中对应位清零
+  93   2              else
+  94   2                  dat |= mask;  //为1时，dat中对应位置1
+  95   2              I2CDelay();
+  96   2              I2C_SCL = 0;      //再拉低SCL，以使从机发送出下一位
+  97   2          }
+  98   1          I2C_SDA = 0;   //8位数据发送完后，拉低SDA，发送应答信号
+  99   1          I2CDelay();
+ 100   1          I2C_SCL = 1;   //拉高SCL
+ 101   1          I2CDelay();
+ 102   1          I2C_SCL = 0;   //再拉低SCL完成应答位，并保持住总线
+ 103   1      
+ 104   1          return dat;
+ 105   1      }
+ 106          /* 将一段内存数据转换为十六进制格式的字符串，
+ 107             str-字符串指针，src-源数据地址，len-数据长度 */
+ 108          void MemToStr(unsigned char *str, unsigned char *src, unsigned char len)
+ 109          {
+ 110   1          unsigned char tmp;
+ 111   1      
+ 112   1          while (len--)
+ 113   1          {
+ 114   2              tmp = *src >> 4;           //先取高4位
+ 115   2              if (tmp <= 9)              //转换为0-9或A-F
+ 116   2                  *str++ = tmp + '0';
+C51 COMPILER V9.57.0.0   IIC                                                               11/13/2018 14:55:13 PAGE 3   
+
+ 117   2              else
+ 118   2                  *str++ = tmp - 10 + 'A';
+ 119   2              tmp = *src & 0x0F;         //再取低4位
+ 120   2              if (tmp <= 9)              //转换为0-9或A-F
+ 121   2                  *str++ = tmp + '0';
+ 122   2              else
+ 123   2                  *str++ = tmp - 10 + 'A';
+ 124   2              *str++ = ' ';              //转换完一个字节添加一个空格
+ 125   2              src++;
+ 126   2          }
+ 127   1        *str = '\0';                   //添加字符串结束符
+ 128   1      }
+ 129          /* E2读取函数，buf-数据接收指针，addr-E2中的起始地址，len-读取长度 */
+ 130          void E2Read(unsigned char *buf, unsigned char addr, unsigned char len)
+ 131          {
+ 132   1          do {                       //用寻址操作查询当前是否可进行读写操作
+ 133   2              I2CStart();
+ 134   2              if (I2CWrite(ChipAdress)) //应答则跳出循环，非应答则进行下一次查询
+ 135   2              {
+ 136   3                  break;
+ 137   3              }
+ 138   2              I2CStop();
+ 139   2          } while(1);
+ 140   1          
+ 141   1          I2CWrite(addr);            //写入起始地址
+ 142   1          I2CStart();                //发送重复启动信号
+ 143   1          I2CWrite(ChipAdress|0x01);  //寻址器件，后续为读操作
+ 144   1          while (len > 1)            //连续读取len-1个字节
+ 145   1          {
+ 146   2              *buf++ = I2CReadACK(); //最后字节之前为读取操作+应答
+ 147   2              len--;
+ 148   2          }
+ 149   1          *buf = I2CReadNAK();       //最后一个字节为读取操作+非应答
+ 150   1          I2CStop();
+ 151   1      }
+ 152          /* E2写入函数，buf-源数据指针，addr-E2中的起始地址，len-写入长度 */
+ 153          void E2Write(unsigned char *buf, unsigned char addr, unsigned char len)
+ 154          {
+ 155   1          while (len--)
+ 156   1          {
+ 157   2              do {                       //用寻址操作查询当前是否可进行读写操作
+ 158   3                  I2CStart();
+ 159   3                  if (I2CWrite(ChipAdress)) //应答则跳出循环，非应答则进行下一次查询
+ 160   3                  {
+ 161   4                      break;
+ 162   4                  }
+ 163   3                  I2CStop();
+ 164   3              } while(1);
+ 165   2              I2CWrite(addr++);  //写入起始地址
+ 166   2              I2CWrite(*buf++);  //写入一个字节数据
+ 167   2              I2CStop();         //结束写操作，以等待写入完成
+ 168   2          }
+ 169   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    514    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      1      17
+   IDATA SIZE       =   ----    ----
+C51 COMPILER V9.57.0.0   IIC                                                               11/13/2018 14:55:13 PAGE 4   
+
+   BIT SIZE         =   ----       1
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,196 @@
+C51 COMPILER V9.59.0.0   COMMON                                                            06/08/2019 11:48:47 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE COMMON
+OBJECT MODULE PLACED IN .\Objects\Common.obj
+COMPILER INVOKED BY: D:\keil C51\C51\BIN\C51.EXE Lib\Common.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listin
+                    -gs\Common.lst) TABS(2) OBJECT(.\Objects\Common.obj)
+
+line level    source
+
+   1          #include  "uart.h"
+   2          #include <stdarg.h>
+   3          
+   4          
+   5          
+   6          static char *                 itoa                                ( int value, char * string, int radix );
+   7          
+   8          
+   9          
+  10          /*
+  11           * 函数名：USART2_printf
+  12           * 描述  ：格式化输出，类似于C库中的printf，但这里没有用到C库
+  13           * 输入  ：-USARTx 串口通道，这里只用到了串口2，即USART2
+  14           *         -Data   要发送到串口的内容的指针
+  15           *         -...    其他参数
+  16           * 输出  ：无
+  17           * 返回  ：无 
+  18           * 调用  ：外部调用
+  19           *         典型应用USART2_printf( USART2, "\r\n this is a demo \r\n" );
+  20           *                 USART2_printf( USART2, "\r\n %d \r\n", i );
+  21           *                 USART2_printf( USART2, "\r\n %s \r\n", j );
+  22           */
+  23          void USART_printf ( USART_TypeDef * USARTx, char * Data, ... )
+*** ERROR C141 IN LINE 23 OF Lib\Common.c: syntax error near '*', expected ')'
+  24          {
+  25   1        const char *s;
+  26   1        int d;   
+  27   1        char buf[16];
+  28   1      
+  29   1        
+  30   1        va_list ap;
+  31   1        va_start(ap, Data);
+*** ERROR C202 IN LINE 31 OF Lib\Common.c: 'Data': undefined identifier
+  32   1      
+  33   1        while ( * Data != 0 )     // 判断是否到达字符串结束符
+*** ERROR C202 IN LINE 33 OF Lib\Common.c: 'Data': undefined identifier
+  34   1        {                                 
+  35   2          if ( * Data == 0x5c )  //'\'
+*** ERROR C202 IN LINE 35 OF Lib\Common.c: 'Data': undefined identifier
+  36   2          {                   
+  37   3            switch ( *++Data )
+*** ERROR C202 IN LINE 37 OF Lib\Common.c: 'Data': undefined identifier
+  38   3            {
+  39   4              case 'r':                       //回车符
+  40   4              //USART_SendData(USARTx, 0x0d);
+  41   4              UART2_SendData(0x0d);
+  42   4              Data ++;
+*** ERROR C202 IN LINE 42 OF Lib\Common.c: 'Data': undefined identifier
+  43   4              break;
+  44   4      
+  45   4              case 'n':                       //换行符
+  46   4              UART2_SendData(0x0a); 
+  47   4              Data ++;
+*** ERROR C202 IN LINE 47 OF Lib\Common.c: 'Data': undefined identifier
+C51 COMPILER V9.59.0.0   COMMON                                                            06/08/2019 11:48:47 PAGE 2   
+
+  48   4              break;
+  49   4      
+  50   4              default:
+  51   4              Data ++;
+*** ERROR C202 IN LINE 51 OF Lib\Common.c: 'Data': undefined identifier
+  52   4              break;
+  53   4            }      
+  54   3          }
+  55   2          
+  56   2          else if ( * Data == '%')
+*** ERROR C202 IN LINE 56 OF Lib\Common.c: 'Data': undefined identifier
+  57   2          {                   //
+  58   3            switch ( *++Data )
+*** ERROR C202 IN LINE 58 OF Lib\Common.c: 'Data': undefined identifier
+  59   3            {       
+  60   4              case 's':                     //字符串
+  61   4              s = va_arg(ap, const char *);
+  62   4              
+  63   4              for ( ; *s; s++) 
+  64   4              {
+  65   5                UART2_SendData(*s);
+  66   5              }
+  67   4              
+  68   4              Data++;
+*** ERROR C202 IN LINE 68 OF Lib\Common.c: 'Data': undefined identifier
+  69   4              
+  70   4              break;
+  71   4      
+  72   4              case 'd':     
+  73   4                //十进制
+  74   4              d = va_arg(ap, int);
+  75   4              
+  76   4              itoa(d, buf, 10);
+  77   4              
+  78   4              for (s = buf; *s; s++) 
+  79   4              {
+  80   5                UART2_SendData(*s);
+  81   5              }
+  82   4              
+  83   4              Data++;
+*** ERROR C202 IN LINE 83 OF Lib\Common.c: 'Data': undefined identifier
+  84   4              
+  85   4              break;
+  86   4              
+  87   4              default:
+  88   4              Data++;
+*** ERROR C202 IN LINE 88 OF Lib\Common.c: 'Data': undefined identifier
+  89   4              
+  90   4              break;
+  91   4              
+  92   4            }    
+  93   3          }
+  94   2             //USART_SendData(USARTx, *Data++);   
+  95   2          else UART2_SendData(*Data++);
+*** ERROR C202 IN LINE 95 OF Lib\Common.c: 'Data': undefined identifier
+  96   2          
+  97   2          //while ( USART_GetFlagStatus ( USARTx, USART_FLAG_TXE ) == RESET );
+  98   2          
+  99   2        }
+ 100   1      }
+ 101          
+ 102          
+C51 COMPILER V9.59.0.0   COMMON                                                            06/08/2019 11:48:47 PAGE 3   
+
+ 103          /*
+ 104           * 函数名：itoa
+ 105           * 描述  ：将整形数据转换成字符串
+ 106           * 输入  ：-radix =10 表示10进制，其他结果为0
+ 107           *         -value 要转换的整形数
+ 108           *         -buf 转换后的字符串
+ 109           *         -radix = 10
+ 110           * 输出  ：无
+ 111           * 返回  ：无
+ 112           * 调用  ：被USART2_printf()调用
+ 113           */
+ 114          static char * itoa( int value, char *string, int radix )
+ 115          {
+ 116   1        int     i, d;
+ 117   1        int     flag = 0;
+ 118   1        char    *ptr = string;
+ 119   1      
+ 120   1        /* This implementation only works for decimal numbers. */
+ 121   1        if (radix != 10)
+ 122   1        {
+ 123   2          *ptr = 0;
+ 124   2          return string;
+ 125   2        }
+ 126   1      
+ 127   1        if (!value)
+ 128   1        {
+ 129   2          *ptr++ = 0x30;
+ 130   2          *ptr = 0;
+ 131   2          return string;
+ 132   2        }
+ 133   1      
+ 134   1        /* if this is a negative value insert the minus sign. */
+ 135   1        if (value < 0)
+ 136   1        {
+ 137   2          *ptr++ = '-';
+ 138   2      
+ 139   2          /* Make the value positive. */
+ 140   2          value *= -1;
+ 141   2          
+ 142   2        }
+ 143   1      
+ 144   1        for (i = 10000; i > 0; i /= 10)
+ 145   1        {
+ 146   2          d = value / i;
+ 147   2      
+ 148   2          if (d || flag)
+ 149   2          {
+ 150   3            *ptr++ = (char)(d + 0x30);
+ 151   3            value -= (d * i);
+ 152   3            flag = 1;
+ 153   3          }
+ 154   2        }
+ 155   1      
+ 156   1        /* Null terminate the string. */
+ 157   1        *ptr = 0;
+ 158   1      
+ 159   1        return string;
+ 160   1      
+ 161   1      } /* NCL_Itoa */
+ 162          
+ 163          
+ 164          
+C51 COMPILER V9.59.0.0   COMMON                                                            06/08/2019 11:48:47 PAGE 4   
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  14 ERROR(S)

@@ -1,0 +1,167 @@
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                    05/25/2018  18:59:13  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22.2.0, INVOKED BY:
+D:\MDK\C51\BIN\BL51.EXE .\Objects\main.obj TO .\Objects\Pro PRINT (.\Listings\Pro.m51) RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  .\Objects\main.obj (MAIN)
+  D:\MDK\C51\LIB\C51S.LIB (?C_STARTUP)
+  D:\MDK\C51\LIB\C51S.LIB (?C?SIDIV)
+  D:\MDK\C51\LIB\C51S.LIB (RAND)
+  D:\MDK\C51\LIB\C51S.LIB (?C?UIDIV)
+
+
+LINK MAP OF MODULE:  .\Objects\Pro (MAIN)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0005H     UNIT         ?DT?MAIN
+            DATA    000DH     0004H     UNIT         ?DT?RAND?RAND
+            IDATA   0011H     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     0008H     UNIT         ?PR?_SEND_BYTE?MAIN
+            CODE    000BH     0003H     ABSOLUTE     
+            CODE    000EH     008BH     UNIT         ?C?LIB_CODE
+            CODE    0099H     0078H     UNIT         ?PR?TIMER_0?MAIN
+            CODE    0111H     004DH     UNIT         ?PR?RAND?RAND
+            CODE    015EH     0019H     UNIT         ?PR?UART_INIT?MAIN
+            CODE    0177H     0015H     UNIT         ?PR?MAIN?MAIN
+            CODE    018CH     000CH     UNIT         ?C_C51STARTUP
+
+
+
+OVERLAY MAP OF MODULE:   .\Objects\Pro (MAIN)
+
+
+SEGMENT
+  +--> CALLED SEGMENT
+---------------------
+?PR?TIMER_0?MAIN
+  +--> ?PR?RAND?RAND
+  +--> ?PR?_SEND_BYTE?MAIN
+
+*** NEW ROOT ***************************************************
+
+?C_C51STARTUP
+  +--> ?PR?MAIN?MAIN
+
+?PR?MAIN?MAIN
+  +--> ?PR?UART_INIT?MAIN
+
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  05/25/2018  18:59:13  PAGE 2
+
+
+
+
+SYMBOL TABLE OF MODULE:  .\Objects\Pro (MAIN)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        MAIN
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  C:0003H         PUBLIC        _Send_Byte
+  B:00A8H.7       PUBLIC        EA
+  C:0099H         PUBLIC        Timer_0
+  C:015EH         PUBLIC        Uart_Init
+  B:00A8H.4       PUBLIC        ES
+  B:0098H.1       PUBLIC        TI
+  C:0177H         PUBLIC        main
+  D:0099H         PUBLIC        SBUF
+  D:0087H         PUBLIC        PCON
+  D:0098H         PUBLIC        SCON
+  D:0089H         PUBLIC        TMOD
+  B:00A8H.1       PUBLIC        ET0
+  D:008CH         PUBLIC        TH0
+  D:008DH         PUBLIC        TH1
+  D:008AH         PUBLIC        TL0
+  D:0009H         PUBLIC        longitude
+  D:008BH         PUBLIC        TL1
+  B:0088H.4       PUBLIC        TR0
+  B:0088H.6       PUBLIC        TR1
+  D:000BH         PUBLIC        latitude
+  -------         PROC          MAIN
+  C:0177H         LINE#         10
+  C:0177H         LINE#         11
+  C:0177H         LINE#         12
+  C:017AH         LINE#         13
+  C:017DH         LINE#         14
+  C:0180H         LINE#         15
+  C:0183H         LINE#         16
+  C:0185H         LINE#         17
+  C:0187H         LINE#         18
+  C:018AH         LINE#         19
+  -------         ENDPROC       MAIN
+  -------         PROC          UART_INIT
+  C:015EH         LINE#         22
+  C:015EH         LINE#         23
+  C:015EH         LINE#         24
+  C:0161H         LINE#         25
+  C:0164H         LINE#         26
+  C:0167H         LINE#         27
+  C:016AH         LINE#         28
+  C:016CH         LINE#         29
+  C:016FH         LINE#         30
+  C:0172H         LINE#         31
+  C:0174H         LINE#         32
+  C:0176H         LINE#         33
+  -------         ENDPROC       UART_INIT
+  -------         PROC          _SEND_BYTE
+  D:0007H         SYMBOL        dat
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  05/25/2018  18:59:13  PAGE 3
+
+
+  C:0003H         LINE#         34
+  C:0003H         LINE#         35
+  C:0003H         LINE#         36
+  C:0005H         LINE#         37
+  C:0008H         LINE#         38
+  C:000AH         LINE#         39
+  -------         ENDPROC       _SEND_BYTE
+  -------         PROC          TIMER_0
+  -------         DO            
+  D:0008H         SYMBOL        i
+  -------         ENDDO         
+  C:0099H         LINE#         41
+  C:00B6H         LINE#         45
+  C:00B9H         LINE#         46
+  C:00BCH         LINE#         47
+  C:00BEH         LINE#         48
+  C:00C4H         LINE#         49
+  C:00C4H         LINE#         50
+  C:00C6H         LINE#         51
+  C:00D9H         LINE#         52
+  C:00ECH         LINE#         53
+  C:00F1H         LINE#         54
+  C:00F6H         LINE#         55
+  C:00F6H         LINE#         56
+  -------         ENDPROC       TIMER_0
+  -------         ENDMOD        MAIN
+
+  -------         MODULE        ?C?SIDIV
+  C:000EH         PUBLIC        ?C?SIDIV
+  -------         ENDMOD        ?C?SIDIV
+
+  -------         MODULE        RAND
+  D:000DH         PUBLIC        ?SRAND?BYTE
+  C:0111H         PUBLIC        RAND
+  C:0153H         PUBLIC        _SRAND
+  -------         ENDMOD        RAND
+
+  -------         MODULE        ?C?UIDIV
+  C:0044H         PUBLIC        ?C?UIDIV
+  -------         ENDMOD        ?C?UIDIV
+
+Program Size: data=18.0 xdata=0 code=408
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

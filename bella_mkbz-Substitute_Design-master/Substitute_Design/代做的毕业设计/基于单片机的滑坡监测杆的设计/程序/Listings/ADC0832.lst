@@ -1,0 +1,66 @@
+C51 COMPILER V9.57.0.0   ADC0832                                                           05/25/2018 19:11:27 PAGE 1   
+
+
+C51 COMPILER V9.57.0.0, COMPILATION OF MODULE ADC0832
+OBJECT MODULE PLACED IN .\Objects\ADC0832.obj
+COMPILER INVOKED BY: D:\mdk\C51\BIN\C51.EXE ADC0832.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\ADC08
+                    -32.lst) TABS(2) OBJECT(.\Objects\ADC0832.obj)
+
+line level    source
+
+   1          #include "ADC0832.h"
+   2          
+   3          #define pulse0832() _nop_();_nop_();CLK_0832=1;_nop_();_nop_();CLK_0832=0 
+   4          
+   5          unsigned char read0832()  
+   6          {  
+   7   1          unsigned char i, ch = 0, ch1 = 0;  
+   8   1          CS_0832=0;        
+   9   1            
+  10   1          DI_0832=1;  
+  11   1           
+  12   1          pulse0832();      
+  13   1            
+  14   1          DI_0832=1;  
+  15   1          pulse0832();     
+  16   1            
+  17   1          DI_0832=1;  
+  18   1          pulse0832();     
+  19   1            
+  20   1           
+  21   1          DI_0832=1;  
+  22   1            
+  23   1           
+  24   1          for(i = 0; i < 8; ++i) {  
+  25   2              pulse0832();  
+  26   2              ch <<= 1;  
+  27   2              if(DI_0832==1)  
+  28   2                  ch |= 0x01;  
+  29   2          }  
+  30   1            
+  31   1           
+  32   1          for(i = 0; i < 8; ++i) {  
+  33   2              ch1 >>= 1;  
+  34   2              if(DI_0832==1)  
+  35   2                  ch1 |= 0x80;  
+  36   2              pulse0832();  
+  37   2          }  
+  38   1            
+  39   1          CS_0832=1;       
+  40   1          return (ch==ch1) ? ch : 0;        
+  41   1      }  
+*** WARNING C316 IN LINE 41 OF ADC0832.c: unterminated conditionals
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     94    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,141 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              02/11/2020 20:55:49 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\software install\Keil_C51\C51\BIN\C51.EXE User\main.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(.\Li
+                    -b) DEBUG OBJECTEXTEND PRINT(.\Listings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include "bsp_esp8266.h"
+   2          #include "STC12C5Axx.H"
+   3          
+   4          /************本地定义***************/
+   5          void Timer1Init(void);  
+   6          volatile uint8_t ucTcpClosedFlag = 0;
+   7          /***************************************/
+   8          
+   9          void main(void)
+  10          {
+  11   1          char cStr [ 100 ] = { 0 };
+  12   1          unsigned char ucStatus;
+  13   1          Timer1Init(); 
+  14   1          Uart1Init();
+  15   1          EA = 1;
+  16   1          ESP8266_Init();
+  17   1          delay_ms(200);
+  18   1          for(;;)
+  19   1          {
+  20   2            sprintf ( cStr,"TCP TEST !!! \r\n" );
+  21   2      
+  22   2            ESP8266_SendString ( ENABLE, cStr, 0, Single_ID_0 );               //发送数据
+  23   2      
+  24   2            delay_ms(1000);
+  25   2            
+  26   2            if(strEsp8266_Fram_Record .InfBit .FramFinishFlag)
+  27   2            {
+  28   3              strEsp8266_Fram_Record .InfBit .FramFinishFlag = 0;
+  29   3              UART1_SendString ( strEsp8266_Fram_Record .Data_RX_BUF );
+  30   3            }
+  31   2      
+  32   2            
+  33   2            if ( ucTcpClosedFlag )                                             //检测是否失去连接
+  34   2            {
+  35   3              ESP8266_ExitUnvarnishSend ();                                    //退出透传模式
+  36   3              
+  37   3              do ucStatus = ESP8266_Get_LinkStatus ();                         //获取连接状态
+  38   3              while ( ! ucStatus );
+  39   3              UART1_SendString ( "???@@@@@@@@" );
+  40   3              if ( ucStatus == 4 )                                             //确认失去连接后重连
+  41   3              {
+  42   4                UART1_SendString ( "正在重连热点和服务器 ......" );
+  43   4                
+  44   4                while ( ! ESP8266_JoinAP ( macUser_ESP8266_ApSsid, macUser_ESP8266_ApPwd ) );
+  45   4                
+  46   4                while ( ! ESP8266_Link_Server ( enumTCP, macUser_ESP8266_TcpServer_IP, macUser_ESP8266_TcpServer_Port
+             -, Single_ID_0 ) );
+  47   4                
+  48   4                UART1_SendString ( "重连热点和服务器成功" );
+  49   4                
+  50   4                ucTcpClosedFlag = 0;
+  51   4      
+  52   4              }
+  53   3              
+C51 COMPILER V9.60.0.0   MAIN                                                              02/11/2020 20:55:49 PAGE 2   
+
+  54   3              while ( ! ESP8266_UnvarnishSend () );   
+  55   3              
+  56   3            }
+  57   2            
+  58   2          }
+  59   1      }
+  60          
+  61          void Uart2() interrupt 8
+  62          {
+  63   1          IE2  &= ~0x01;   //关闭串口2中断
+  64   1          if (S2CON & S2RI)
+  65   1          {
+  66   2            S2CON &= ~S2RI;                 //清除S2RI位
+  67   2            ET1 = 0;                        //关闭定时器1中断
+  68   2            strEsp8266_Fram_Record .Data_RX_BUF [ strEsp8266_Fram_Record .InfBit .FramLength ++ ] = S2BUF;      //将
+             -接收到的字符串存到缓存中
+  69   2            if(strEsp8266_Fram_Record .InfBit .FramLength > 39)                 //如果缓存满,将缓存指针指向缓存的首地
+             -址
+  70   2            {
+  71   3              strEsp8266_Fram_Record .InfBit .FramLength = 0;
+  72   3            }
+  73   2            TL1 = 0x00;   //设置定时初值
+  74   2            TH1 = 0xDC;   //设置定时初值
+  75   2            ET1 = 1;                        //打开定时器1中断     
+  76   2          }
+  77   1          if (S2CON & S2TI)
+  78   1          {
+  79   2            S2CON &= ~S2TI;         //清除S2TI位
+  80   2          }
+  81   1          IE2  |= 0x01;   //使能串口2中断
+  82   1      }
+  83          
+  84          
+  85          void Timer1() interrupt 3
+  86          {
+  87   1          static u8 i = 0;
+  88   1          TL1 = 0x00;   //设置定时初值
+  89   1          TH1 = 0xDC;   //设置定时初值
+  90   1          i++;
+  91   1          if(i == 20)
+  92   1          {
+  93   2            strEsp8266_Fram_Record .InfBit .FramFinishFlag = 1;
+  94   2            ucTcpClosedFlag = strstr ( strEsp8266_Fram_Record .Data_RX_BUF, "CLOSED\r\n" ) ? 1 : 0;
+  95   2            ET1 = 0;  
+  96   2            i = 0;    
+  97   2          }
+  98   1      }
+  99          
+ 100          
+ 101          void Timer1Init(void)   //10毫秒@11.0592MHz
+ 102          {
+ 103   1          AUXR &= 0xBF;   //定时器时钟12T模式
+ 104   1          TMOD &= 0x0F;   //设置定时器模式
+ 105   1          TMOD |= 0x10;   //设置定时器模式
+ 106   1          TL1 = 0x00;     //设置定时初值
+ 107   1          TH1 = 0xDC;     //设置定时初值
+ 108   1          TF1 = 0;        //清除TF1标志
+ 109   1          TR1 = 1;        //定时器1开始计时
+ 110   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+C51 COMPILER V9.60.0.0   MAIN                                                              02/11/2020 20:55:49 PAGE 3   
+
+   CODE SIZE        =    471    ----
+   CONSTANT SIZE    =    219    ----
+   XDATA SIZE       =      2     101
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

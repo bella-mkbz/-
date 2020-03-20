@@ -1,0 +1,64 @@
+A51 MACRO ASSEMBLER  CSBFS1                                                               10/26/2017 13:00:53 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.2.5.0
+OBJECT MODULE PLACED IN CSBFS1.OBJ
+ASSEMBLER INVOKED BY: C:\Keil_v5\C51\BIN\A51.EXE CSBFS1.ASM SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+                       1             UCSBFS1 SEGMENT CODE
+
+----                   2             RSEG UCSBFS1
+
+                       3             PUBLIC CSBFS1
+
+*** ________________________________________^
+*** ERROR #A45 IN 3 (CSBFS1.ASM, LINE 3): UNDEFINED SYMBOL (PASS-2)
+0000 7908              4     CSBFS:  mov R1,#8h    ;³¬Éù²¨·¢ÉäµÄÍêÕû²¨ÐÎ¸öÊ£º¹²¼ÆËÄ¸ö
+
+0002 B2A7              5      here:  cpl p2.7       ;Êä³ö40kHz·½²¨        
+
+0004 00                6             nop  
+
+0005 00                7             nop              
+
+0006 00                8             nop
+
+0007 00                9             nop  
+
+0008 00               10             nop              
+
+0009 00               11             nop
+
+000A 00               12             nop  
+
+000B 00               13             nop              
+
+000C 00               14             nop                                                                  
+
+000D D9F3             15             djnz R1,here    
+
+000F 22               16             RET
+
+                      17             END     
+
+A51 MACRO ASSEMBLER  CSBFS1                                                               10/26/2017 13:00:53 PAGE     2
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+CSBFS. . . . . . .  C ADDR   0000H   R   SEG=UCSBFS1
+CSBFS1 . . . . . .    ----   -----       
+HERE . . . . . . .  C ADDR   0002H   R   SEG=UCSBFS1
+P2 . . . . . . . .  D ADDR   00A0H   A   
+UCSBFS1. . . . . .  C SEG    0010H       REL=UNIT
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 1 ERROR(S)

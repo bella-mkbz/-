@@ -1,0 +1,283 @@
+BL51 BANKED LINKER/LOCATER V6.22                                                        10/12/2017  01:36:54  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
+C:\KEIL_V5\C51\BIN\BL51.EXE .\Objects\SLAVE.obj TO .\Objects\pro PRINT (.\Listings\pro.m51) RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  .\Objects\SLAVE.obj (SLAVE)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_STARTUP)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C?CLDPTR)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C?OFFXADD)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_INIT)
+
+
+LINK MAP OF MODULE:  .\Objects\pro (SLAVE)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+                    0008H     0018H                  *** GAP ***
+            BIT     0020H.0   0000H.2   UNIT         ?BI?SLAVE
+                    0020H.2   0000H.6                *** GAP ***
+            DATA    0021H     001CH     UNIT         _DATA_GROUP_
+            DATA    003DH     001AH     UNIT         ?DT?SLAVE
+            IDATA   0057H     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     001AH     UNIT         ?C_INITSEG
+                    001DH     0006H                  *** GAP ***
+            CODE    0023H     0003H     ABSOLUTE     
+            CODE    0026H     0400H     UNIT         ?CO?SLAVE
+            CODE    0426H     00E8H     UNIT         ?PR?MAIN?SLAVE
+            CODE    050EH     008CH     UNIT         ?PR?_CRC16?SLAVE
+            CODE    059AH     008CH     UNIT         ?C_C51STARTUP
+            CODE    0626H     0049H     UNIT         ?PR?UARTINTERRUPT?SLAVE
+            CODE    066FH     0043H     UNIT         ?PR?_MDPROC?SLAVE
+            CODE    06B2H     0025H     UNIT         ?C?LIB_CODE
+            CODE    06D7H     0016H     UNIT         ?PR?INITUART?SLAVE
+            CODE    06EDH     0008H     UNIT         ?PR?_SENDONEBYTE?SLAVE
+
+
+
+OVERLAY MAP OF MODULE:   .\Objects\pro (SLAVE)
+
+
+SEGMENT                           DATA_GROUP 
+  +--> CALLED SEGMENT           START    LENGTH
+-----------------------------------------------
+?PR?UARTINTERRUPT?SLAVE         -----    -----
+  +--> ?PR?_MDPROC?SLAVE
+
+?PR?_MDPROC?SLAVE               -----    -----
+  +--> ?PR?_CRC16?SLAVE
+BL51 BANKED LINKER/LOCATER V6.22                                                      10/12/2017  01:36:54  PAGE 2
+
+
+
+?PR?_CRC16?SLAVE                0030H    000DH
+  +--> ?CO?SLAVE
+
+*** NEW ROOT ***************************************************
+
+?C_C51STARTUP                   -----    -----
+  +--> ?PR?MAIN?SLAVE
+  +--> ?C_INITSEG
+
+?PR?MAIN?SLAVE                  002EH    0002H
+  +--> ?PR?INITUART?SLAVE
+  +--> ?PR?_CRC16?SLAVE
+  +--> ?PR?_SENDONEBYTE?SLAVE
+
+
+
+SYMBOL TABLE OF MODULE:  .\Objects\pro (SLAVE)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        SLAVE
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  C:050EH         PUBLIC        _Crc16
+  D:0090H         PUBLIC        P1
+  D:00B0H         PUBLIC        P3
+  B:0020H.0       PUBLIC        nodeok
+  D:003DH         PUBLIC        byterev
+  B:00A8H.7       PUBLIC        EA
+  C:066FH         PUBLIC        _mdproc
+  D:00A8H         PUBLIC        IE
+  C:0626H         PUBLIC        UARTInterrupt
+  B:0020H.1       PUBLIC        crcok
+  B:00A8H.4       PUBLIC        ES
+  D:00B8H         PUBLIC        IP
+  B:0098H.0       PUBLIC        RI
+  B:0098H.1       PUBLIC        TI
+  B:00B0H.2       PUBLIC        nodesel0
+  B:00B0H.3       PUBLIC        nodesel1
+  C:0426H         PUBLIC        main
+  D:003EH         PUBLIC        revptr
+  D:003FH         PUBLIC        node
+  C:0026H         PUBLIC        auchCRCHi
+  D:0099H         PUBLIC        SBUF
+  D:0087H         PUBLIC        PCON
+  D:0098H         PUBLIC        SCON
+  D:0089H         PUBLIC        TMOD
+  D:0088H         PUBLIC        TCON
+  C:0226H         PUBLIC        auchCRCLo
+  C:06EDH         PUBLIC        _SendOneByte
+  D:008DH         PUBLIC        TH1
+  D:008BH         PUBLIC        TL1
+  C:06D7H         PUBLIC        InitUART
+  B:0088H.6       PUBLIC        TR1
+  D:0040H         PUBLIC        mrx
+  D:004AH         PUBLIC        delaycnt
+BL51 BANKED LINKER/LOCATER V6.22                                                      10/12/2017  01:36:54  PAGE 3
+
+
+  D:004CH         PUBLIC        mtx
+  D:00C8H         PUBLIC        T2CON
+  B:00B0H.4       PUBLIC        rw
+  D:00D0H         PUBLIC        PSW
+  -------         PROC          MAIN
+  -------         DO            
+  D:0004H         SYMBOL        temp16
+  D:002EH         SYMBOL        i
+  -------         ENDDO         
+  C:0426H         LINE#         89
+  C:0426H         LINE#         90
+  C:0426H         LINE#         93
+  C:0428H         LINE#         94
+  C:042AH         LINE#         95
+  C:0444H         LINE#         96
+  C:045EH         LINE#         98
+  C:0469H         LINE#         99
+  C:046FH         LINE#         100
+  C:047BH         LINE#         101
+  C:047EH         LINE#         102
+  C:0480H         LINE#         104
+  C:0480H         LINE#         105
+  C:0480H         LINE#         106
+  C:0483H         LINE#         107
+  C:0483H         LINE#         109
+  C:0486H         LINE#         110
+  C:0489H         LINE#         111
+  C:048FH         LINE#         112
+  C:0492H         LINE#         113
+  C:0495H         LINE#         114
+  C:04A2H         LINE#         115
+  C:04A5H         LINE#         116
+  C:04A8H         LINE#         118
+  C:04AEH         LINE#         119
+  C:04BBH         LINE#         120
+  C:04BDH         LINE#         121
+  C:04C3H         LINE#         122
+  C:04D0H         LINE#         123
+  C:04D5H         LINE#         124
+  C:04D5H         LINE#         125
+  C:04E1H         LINE#         126
+  C:04F4H         LINE#         127
+  C:04F6H         LINE#         128
+  C:04FCH         LINE#         129
+  C:0509H         LINE#         130
+  C:050BH         LINE#         131
+  C:050BH         LINE#         132
+  -------         ENDPROC       MAIN
+  -------         PROC          _CRC16
+  D:0030H         SYMBOL        puchMsg
+  D:0033H         SYMBOL        usDataLen
+  -------         DO            
+  D:0035H         SYMBOL        uchCRCHi
+  D:0037H         SYMBOL        uchCRCLo
+  D:0002H         SYMBOL        temp16
+  D:0039H         SYMBOL        uIndex
+  -------         ENDDO         
+BL51 BANKED LINKER/LOCATER V6.22                                                      10/12/2017  01:36:54  PAGE 4
+
+
+  C:050EH         LINE#         135
+  C:0518H         LINE#         136
+  C:0518H         LINE#         137
+  C:051EH         LINE#         138
+  C:0524H         LINE#         141
+  C:0531H         LINE#         142
+  C:0531H         LINE#         143
+  C:0545H         LINE#         144
+  C:0555H         LINE#         145
+  C:0574H         LINE#         146
+  C:058FH         LINE#         147
+  C:0591H         LINE#         148
+  C:0599H         LINE#         149
+  -------         ENDPROC       _CRC16
+  -------         PROC          UARTINTERRUPT
+  C:0626H         LINE#         151
+  C:0643H         LINE#         153
+  C:0646H         LINE#         154
+  C:0646H         LINE#         155
+  C:0648H         LINE#         156
+  C:064BH         LINE#         157
+  C:0650H         LINE#         158
+  C:0652H         LINE#         160
+  C:0654H         LINE#         161
+  -------         ENDPROC       UARTINTERRUPT
+  -------         PROC          _MDPROC
+  D:0007H         SYMBOL        b
+  -------         DO            
+  D:0004H         SYMBOL        temp16_1
+  D:0006H         SYMBOL        temp16_2
+  -------         ENDDO         
+  C:066FH         LINE#         163
+  C:066FH         LINE#         164
+  C:066FH         LINE#         166
+  C:0672H         LINE#         167
+  C:0672H         LINE#         168
+  C:0677H         LINE#         169
+  C:0677H         LINE#         170
+  C:0679H         LINE#         171
+  C:067BH         LINE#         172
+  C:067EH         LINE#         173
+  C:067EH         LINE#         174
+  C:067FH         LINE#         176
+  C:067FH         LINE#         177
+  C:0689H         LINE#         178
+  C:068FH         LINE#         179
+  C:068FH         LINE#         180
+  C:0691H         LINE#         181
+  C:06A0H         LINE#         182
+  C:06A2H         LINE#         183
+  C:06A4H         LINE#         184
+  C:06A7H         LINE#         185
+  C:06AFH         LINE#         186
+  C:06B1H         LINE#         187
+  C:06B1H         LINE#         188
+  C:06B1H         LINE#         189
+  -------         ENDPROC       _MDPROC
+BL51 BANKED LINKER/LOCATER V6.22                                                      10/12/2017  01:36:54  PAGE 5
+
+
+  -------         PROC          _SENDONEBYTE
+  D:0007H         SYMBOL        c
+  C:06EDH         LINE#         191
+  C:06EDH         LINE#         192
+  C:06EDH         LINE#         193
+  C:06EFH         LINE#         194
+  C:06F2H         LINE#         195
+  C:06F4H         LINE#         196
+  -------         ENDPROC       _SENDONEBYTE
+  -------         PROC          INITUART
+  C:06D7H         LINE#         199
+  C:06D7H         LINE#         200
+  C:06D7H         LINE#         201
+  C:06DAH         LINE#         202
+  C:06DDH         LINE#         203
+  C:06E0H         LINE#         204
+  C:06E3H         LINE#         205
+  C:06E6H         LINE#         206
+  C:06E8H         LINE#         207
+  C:06EAH         LINE#         208
+  C:06ECH         LINE#         209
+  -------         ENDPROC       INITUART
+  -------         ENDMOD        SLAVE
+
+  -------         MODULE        ?C?CLDPTR
+  C:06B2H         PUBLIC        ?C?CLDPTR
+  -------         ENDMOD        ?C?CLDPTR
+
+  -------         MODULE        ?C?OFFXADD
+  C:06CBH         PUBLIC        ?C?OFFXADD
+  -------         ENDMOD        ?C?OFFXADD
+
+*** WARNING L15: MULTIPLE CALL TO SEGMENT
+    SEGMENT: ?PR?_CRC16?SLAVE
+    CALLER1: ?PR?UARTINTERRUPT?SLAVE
+    CALLER2: ?C_C51STARTUP
+
+Program Size: data=63.2 xdata=0 code=1775
+LINK/LOCATE RUN COMPLETE.  1 WARNING(S),  0 ERROR(S)

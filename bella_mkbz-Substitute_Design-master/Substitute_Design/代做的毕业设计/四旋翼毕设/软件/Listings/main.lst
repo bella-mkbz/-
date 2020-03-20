@@ -1,0 +1,261 @@
+C51 COMPILER V9.57.0.0   MAIN                                                              04/24/2018 01:03:40 PAGE 1   
+
+
+C51 COMPILER V9.57.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\mdk\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main.lst
+                    -) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <reg51.h>
+   2          #include "button.h"
+   3          #include <stdio.h>
+   4          
+   5          sbit Key_Led = P2^6;
+   6          sbit Remote_Led = P2^7;
+   7          sbit M1_1 = P1^0;
+   8          sbit M1_2 = P1^1;
+   9          sbit M2_1 = P1^2;
+  10          sbit M2_2 = P1^3;
+  11          sbit M3_1 = P1^4;
+  12          sbit M3_2 = P1^5;
+  13          sbit M4_1 = P1^6;
+  14          sbit M4_2 = P1^7;
+  15          sbit Pulse1 = P3^4;
+  16          sbit Pulse2 = P3^5;
+  17          sbit Pulse3 = P3^6;
+  18          sbit Pulse4 = P3^7;
+  19          
+  20          unsigned char Key_Value = 0;
+  21          int Pulse_Time1 = 0;
+  22          int Pulse_Time2 = 0;
+  23          int Pulse_Time3 = 0;
+  24          int Pulse_Time4 = 0;
+  25          bit Control_Flag = 0;
+  26          unsigned char Temp;
+  27          
+  28          void Timer1_Init(void);
+  29          void Serial_Init(void);
+  30          void Port_Init(void);
+  31          void Up(void);
+  32          void Down(void);
+  33          
+  34          void main(void)
+  35          {
+  36   1        Timer1_Init();
+  37   1        Serial_Init();
+  38   1        Port_Init();
+  39   1        while(1)
+  40   1        {  
+  41   2            if(!Control_Flag)
+  42   2            {
+  43   3              Key_Led = 0;
+  44   3              Remote_Led = 1;
+  45   3              Key_Value = Button_Value(); 
+  46   3            } 
+  47   2            else
+  48   2            {
+  49   3              Key_Led = 1;
+  50   3              Remote_Led = 0;     
+  51   3            }
+  52   2            switch (Key_Value)
+  53   2            {
+  54   3              case 1:
+C51 COMPILER V9.57.0.0   MAIN                                                              04/24/2018 01:03:40 PAGE 2   
+
+  55   3                Up();
+  56   3                Pulse_Time1 += 15;
+  57   3                Pulse_Time2 += 15;
+  58   3                Pulse_Time3 += 15;
+  59   3                Pulse_Time4 += 15;
+  60   3                Key_Value = 0;
+  61   3                break;
+  62   3              case 2:
+  63   3                Down();
+  64   3                Pulse_Time1 -= 15;
+  65   3                Pulse_Time2 -= 15;
+  66   3                Pulse_Time3 -= 15;
+  67   3                Pulse_Time4 -= 15;
+  68   3                Key_Value = 0;
+  69   3                break;
+  70   3              case 3:
+  71   3                Pulse_Time2 += 15;
+  72   3                Pulse_Time3 -= 15;
+  73   3                Key_Value = 0;
+  74   3                break;
+  75   3              case 4:
+  76   3                Pulse_Time2 -= 15;
+  77   3                Pulse_Time3 += 15;
+  78   3                Key_Value = 0;
+  79   3                break;
+  80   3              case 5:
+  81   3                Pulse_Time1 -= 15;
+  82   3                Pulse_Time4 += 15;
+  83   3                Key_Value = 0;
+  84   3                break;
+  85   3              case 6:
+  86   3                Pulse_Time1 += 15;
+  87   3                Pulse_Time4 -= 15;
+  88   3                Key_Value = 0;
+  89   3                break;
+  90   3              default:
+  91   3                break;
+  92   3            }
+  93   2            
+  94   2        }
+  95   1      }
+  96          
+  97          void Serial() interrupt 4
+  98          {
+  99   1          if(RI)
+ 100   1            {
+ 101   2              RI = 0;
+ 102   2              Temp = SBUF;
+ 103   2              switch (Temp)
+ 104   2              {
+ 105   3                case 0x55:
+ 106   3                  Control_Flag = 1;
+ 107   3                  TI = 1;
+ 108   3                  printf("Obtain Control authority \n");
+ 109   3                  while(!TI);
+ 110   3                  TI = 0;
+ 111   3                  break;
+ 112   3                case 1:
+ 113   3                  if(Control_Flag)
+ 114   3                  Key_Value = 1;
+ 115   3                  break;
+ 116   3                case 2:
+C51 COMPILER V9.57.0.0   MAIN                                                              04/24/2018 01:03:40 PAGE 3   
+
+ 117   3                  if(Control_Flag)
+ 118   3                  Key_Value = 2;
+ 119   3                  break;
+ 120   3                case 3:
+ 121   3                  if(Control_Flag)
+ 122   3                  Key_Value = 3;
+ 123   3                  break;
+ 124   3                case 4:
+ 125   3                  if(Control_Flag)
+ 126   3                  Key_Value = 4;
+ 127   3                  break;
+ 128   3                case 5:
+ 129   3                  if(Control_Flag)
+ 130   3                  Key_Value = 5;
+ 131   3                  break;
+ 132   3                case 6:
+ 133   3                  if(Control_Flag)
+ 134   3                  Key_Value = 6;
+ 135   3                  break;
+ 136   3                case 0x66:
+ 137   3                  if(Control_Flag)
+ 138   3                  {
+ 139   4                    Control_Flag = 0;
+ 140   4                    TI = 1;
+ 141   4                    printf("Release Control authority \n");
+ 142   4                    while(!TI);
+ 143   4                    TI = 0;             
+ 144   4                  }
+ 145   3                  break;      
+ 146   3                default:
+ 147   3                  break;
+ 148   3              }
+ 149   2            }
+ 150   1      }
+ 151          
+ 152          void Timer_0(void) interrupt 1
+ 153          {
+ 154   1        static unsigned char Count = 0;
+ 155   1        Count++;
+ 156   1          
+ 157   1        if(Count > 100)
+ 158   1           Count = 0;
+ 159   1        if(Pulse_Time1 > 100)
+ 160   1           Pulse_Time1 = 100;
+ 161   1        if(Pulse_Time2 > 100)
+ 162   1           Pulse_Time2 = 100;
+ 163   1        if(Pulse_Time3 > 100)
+ 164   1           Pulse_Time3 = 100;
+ 165   1        if(Pulse_Time4 > 100)
+ 166   1           Pulse_Time4 = 100;
+ 167   1        if(Pulse_Time1 < 0)
+ 168   1           Pulse_Time1 = 0;
+ 169   1        if(Pulse_Time2 < 0)
+ 170   1           Pulse_Time2 = 0;
+ 171   1        if(Pulse_Time3 < 0)
+ 172   1           Pulse_Time3 = 0;
+ 173   1        if(Pulse_Time4 < 0)
+ 174   1           Pulse_Time4 = 0;
+ 175   1        if(Count <= Pulse_Time1)
+ 176   1           Pulse1 = 1;  
+ 177   1        else
+ 178   1          Pulse1 = 0;
+C51 COMPILER V9.57.0.0   MAIN                                                              04/24/2018 01:03:40 PAGE 4   
+
+ 179   1        if(Count <= Pulse_Time2)
+ 180   1          Pulse2 = 1;
+ 181   1        else
+ 182   1          Pulse2 = 0;
+ 183   1        if(Count <= Pulse_Time3)
+ 184   1          Pulse3 = 1;
+ 185   1        else
+ 186   1          Pulse3 = 0;
+ 187   1        if(Count <= Pulse_Time4)
+ 188   1          Pulse4 = 1;
+ 189   1        else
+ 190   1          Pulse4 = 0;
+ 191   1      }
+ 192          
+ 193          void Port_Init(void)
+ 194          {
+ 195   1          P3 |= 0XF0;
+ 196   1          P1 = 0X00;
+ 197   1      }
+ 198          
+ 199          void Up(void)
+ 200          {
+ 201   1        P1 = 0X69;
+ 202   1      }
+ 203          
+ 204          void Down(void)
+ 205          {
+ 206   1        P1 = 0;
+ 207   1      }
+ 208          
+ 209          void Timer1_Init(void)
+ 210          {
+ 211   1          TMOD &= 0XF0;
+ 212   1          TMOD |= 0X02;
+ 213   1          TH0 = 0X48;               //定时周期200us
+ 214   1          TL0 = 0X48;               //定时周期200us
+ 215   1          EA = 1;
+ 216   1          ET0 = 1;
+ 217   1          TR0 = 1;
+ 218   1      }
+ 219          
+ 220          void Serial_Init(void)
+ 221          {
+ 222   1          TMOD &= 0X0F;
+ 223   1          TMOD |= 0X20;
+ 224   1          SCON = 0X50;
+ 225   1          TH1 = 0XFD;            
+ 226   1          TL1 = 0XFD;              
+ 227   1          ES= 1;
+ 228   1          TR1 = 1;
+ 229   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    764    ----
+   CONSTANT SIZE    =     55    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     11    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+C51 COMPILER V9.57.0.0   MAIN                                                              04/24/2018 01:03:40 PAGE 5   
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

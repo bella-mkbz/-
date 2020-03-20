@@ -1,0 +1,162 @@
+C51 COMPILER V9.60.0.0   LCD                                                               02/15/2020 18:07:33 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE LCD
+OBJECT MODULE PLACED IN lcd.OBJ
+COMPILER INVOKED BY: D:\software install\Keil_C51\C51\BIN\C51.EXE lcd.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND TABS
+                    -(2)
+
+line level    source
+
+   1          #include "lcd.h"
+   2          
+   3          
+   4            
+   5          /*******************************************************************************
+   6          * 函 数 名         : Lcd1602_Delay1ms
+   7          * 函数功能       : 延时函数，延时1ms
+   8          * 输    入         : c
+   9          * 输    出         : 无
+  10          * 说    名         : 该函数是在12MHZ晶振下，12分频单片机的延时。
+  11          *******************************************************************************/
+  12          
+  13          void Lcd1602_Delay1ms(uint c)   //误差 0us
+  14          {
+  15   1          uchar a,b;
+  16   1        for (; c>0; c--)
+  17   1        {
+  18   2           for (b=199;b>0;b--)
+  19   2           {
+  20   3              for(a=1;a>0;a--);
+  21   3           }      
+  22   2        }
+  23   1            
+  24   1      }
+  25          
+  26          /*******************************************************************************
+  27          * 函 数 名         : LcdWriteCom
+  28          * 函数功能       : 向LCD写入一个字节的命令
+  29          * 输    入         : com
+  30          * 输    出         : 无
+  31          *******************************************************************************/
+  32          void LcdWriteCom(uchar com)   //写入命令
+  33          {
+  34   1        LCD1602_E = 0;     //使能
+  35   1        LCD1602_RS = 0;    //选择发送命令
+  36   1        LCD1602_RW = 0;    //选择写入
+  37   1        
+  38   1        LCD1602_DATAPINS = com;     //放入命令
+  39   1        Lcd1602_Delay1ms(1);    //等待数据稳定
+  40   1      
+  41   1        LCD1602_E = 1;            //写入时序
+  42   1        Lcd1602_Delay1ms(5);    //保持时间
+  43   1        LCD1602_E = 0;
+  44   1      }
+  45          /*******************************************************************************
+  46          * 函 数 名         : LcdWriteData
+  47          * 函数功能       : 向LCD写入一个字节的数据
+  48          * 输    入         : dat
+  49          * 输    出         : 无
+  50          *******************************************************************************/       
+  51             
+  52          void LcdWriteData(uchar dat)      //写入数据
+  53          {
+  54   1        LCD1602_E = 0;  //使能清零
+C51 COMPILER V9.60.0.0   LCD                                                               02/15/2020 18:07:33 PAGE 2   
+
+  55   1        LCD1602_RS = 1; //选择输入数据
+  56   1        LCD1602_RW = 0; //选择写入
+  57   1      
+  58   1        LCD1602_DATAPINS = dat; //写入数据
+  59   1        Lcd1602_Delay1ms(1);
+  60   1      
+  61   1        LCD1602_E = 1;   //写入时序
+  62   1        Lcd1602_Delay1ms(5);   //保持时间
+  63   1        LCD1602_E = 0;
+  64   1      }
+  65          
+  66          /*******************************************************************************
+  67          * 函 数 名       : LcdInit()
+  68          * 函数功能     : 初始化LCD屏
+  69          * 输    入       : 无
+  70          * 输    出       : 无
+  71          *******************************************************************************/       
+  72          void LcdInit()              //LCD初始化子程序
+  73          {
+  74   1        LcdWriteCom(0x38);  //开显示
+  75   1        LcdWriteCom(0x0c);  //开显示不显示光标
+  76   1        LcdWriteCom(0x06);  //写一个指针加1
+  77   1        LcdWriteCom(0x01);  //清屏
+  78   1        LcdWriteCom(0x80);  //设置数据指针起点
+  79   1      }
+  80          /*******************************************************************************
+  81          * 函 数 名       : Show_String(uchar addr,uchar *str)
+  82          * 函数功能       : 显示字符串
+  83          * 输    入       : 字符串
+  84          * 输    出       : 无
+  85          *******************************************************************************/
+  86          void Show_String(uchar addr,uchar *str)
+  87          {
+  88   1         LcdWriteCom(addr);
+  89   1         while(*str != '\0')
+  90   1         {
+  91   2           LcdWriteData(*str);  
+  92   2           str++;
+  93   2         }
+  94   1      }
+  95          /*******************************************************************************
+  96          * 鍑?鏁?鍚?      : Show_Dec_Number(uchar addr,uint temp)
+  97          * 鍑芥暟鍔熻兘       : 鏄剧ず涓�涓崄杩涘埗鐨勬暟鎹?* 杈?   鍏?      : 鍗佽繘鍒舵暟鎹?* 杈?   鍑?      : 鏃
+             -?*******************************************************************************/
+  98          void Show_Dec_Number(uchar addr,uint temp)
+  99          {
+ 100   1         LcdWriteCom(addr);
+ 101   1         if(temp >= 1000)
+ 102   1         {
+ 103   2            LcdWriteData(temp/1000+0x30);
+ 104   2            LcdWriteData(temp%1000/100+0x30);
+ 105   2            LcdWriteData(temp%100/10+0x30);
+ 106   2            LcdWriteData(temp%10+0x30);
+ 107   2         }
+ 108   1         else if((temp >= 100) && (temp < 1000))
+ 109   1         {
+ 110   2            LcdWriteData(temp/100+0x30);
+ 111   2            LcdWriteData(temp%100/10+0x30);
+ 112   2            LcdWriteData(temp%10+0x30);
+ 113   2            LcdWriteData(' ');
+ 114   2         }
+ 115   1         else if((temp >= 10) && (temp < 100))
+C51 COMPILER V9.60.0.0   LCD                                                               02/15/2020 18:07:33 PAGE 3   
+
+ 116   1         {
+ 117   2            LcdWriteData(temp/10+0x30);
+ 118   2            LcdWriteData(temp%10+0x30);
+ 119   2            LcdWriteData(' ');
+ 120   2            LcdWriteData(' ');
+ 121   2         }
+ 122   1         else
+ 123   1         {
+ 124   2            LcdWriteData(temp+0x30);
+ 125   2            LcdWriteData(' ');
+ 126   2            LcdWriteData(' ');
+ 127   2            LcdWriteData(' ');
+ 128   2         }
+ 129   1         
+ 130   1      }
+ 131          
+ 132          
+ 133          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    366    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

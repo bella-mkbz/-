@@ -1,0 +1,155 @@
+C51 COMPILER V9.57.0.0   MAIN                                                              04/06/2018 15:43:31 PAGE 1   
+
+
+C51 COMPILER V9.57.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\mdk5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main.ls
+                    -t) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <reg51.h>
+   2          #include "button.h"
+   3          #include "delay.h"
+   4          #include "lcd.h"
+   5          sbit Delay_1 = P3^6;
+   6          sbit Delay_2 = P3^7;
+   7          bit  F_F = 0;
+   8          char Flag = 0,Ge = 0,Shi = 0,Timer = 0;
+   9          int Key_Value = 0,j;
+  10          
+  11          void main(void)
+  12          {   
+  13   1          TMOD = 0X01;
+  14   1          TH0 = 0X3c;
+  15   1          TL0 = 0Xb0;
+  16   1          EA = 1;
+  17   1          ET0 = 1;
+  18   1          TR0 = 0;
+  19   1          LcdInit();
+  20   1          Show_String(0x80,"Time System :");
+  21   1          Show_Dec_Number(0X8d,Shi);
+  22   1          Show_Dec_Number(0X8e,Ge);
+  23   1          while(1)
+  24   1           {
+  25   2             if(F_F)
+  26   2             {
+  27   3              F_F = 0;
+  28   3              Delay_1 = 0;
+  29   3              Delay_2 = 0; 
+  30   3              for(j = 0;j < 4;j++)
+  31   3               {
+  32   4                Show_String(0xc0,"Time Finished!");
+  33   4                Delay1ms(300);         
+  34   4                Show_String(0xc0,"              ");
+  35   4                Delay1ms(300);  
+  36   4               }       
+  37   3             }
+  38   2             Key_Value = Button_Value();
+  39   2             switch (Key_Value)
+  40   2             {
+  41   3              case 1:
+  42   3                Flag++;
+  43   3                if(Flag == 3)
+  44   3                   Flag = 1;
+  45   3                break;
+  46   3              case 2:
+  47   3                if(Flag == 2)
+  48   3                  {
+  49   4                    Ge++;
+  50   4                    if(Ge == 10)
+  51   4                      Ge = 0;
+  52   4                  }
+  53   3                  else if(Flag == 1)
+  54   3                    {
+C51 COMPILER V9.57.0.0   MAIN                                                              04/06/2018 15:43:31 PAGE 2   
+
+  55   4                      Shi++;
+  56   4                      if(Shi == 10)
+  57   4                         Shi = 0;
+  58   4                    }
+  59   3                          Show_Dec_Number(0X8d,Shi);
+  60   3                      Show_Dec_Number(0X8e,Ge);
+  61   3                break;
+  62   3              case 3:
+  63   3                if(Flag == 2)
+  64   3                  {
+  65   4                    Ge--;
+  66   4                    if(Ge < 0)
+  67   4                      Ge = 9;
+  68   4                  }
+  69   3                  else if(Flag == 1)
+  70   3                    {
+  71   4                      Shi--;
+  72   4                      if(Shi < 0)
+  73   4                         Shi = 9;
+  74   4                    }
+  75   3                     Show_Dec_Number(0X8d,Shi);
+  76   3                     Show_Dec_Number(0X8e,Ge);
+  77   3                break;
+  78   3              case 4:
+  79   3                Show_String(0xcd," ");
+  80   3                Show_String(0xce," ");
+  81   3                Flag = 0;
+  82   3                TR0 = 1;
+  83   3                Timer = 10*Shi + Ge;
+  84   3                break;
+  85   3              default:
+  86   3                break;
+  87   3             } 
+  88   2            switch (Flag)
+  89   2            {
+  90   3              case 1:
+  91   3                Show_String(0xcd,"-");
+  92   3                Show_String(0xce," ");
+  93   3                break;
+  94   3              case 2:
+  95   3                Show_String(0xcd," ");
+  96   3                Show_String(0xce,"-");      
+  97   3                break;
+  98   3              default:
+  99   3                break;
+ 100   3            }
+ 101   2           }
+ 102   1      }
+ 103          
+ 104          void Timer0(void) interrupt 1
+ 105          {
+ 106   1          static int i = 0;
+ 107   1          TH0 = 0X3c;
+ 108   1          TL0 = 0Xb0;
+ 109   1          i++;
+ 110   1          if(i == 18)
+ 111   1          {
+ 112   2            i = 0;
+ 113   2            Timer--;
+ 114   2            if(Timer < 10)
+ 115   2            {
+ 116   3              Show_Dec_Number(0x8d,0);
+C51 COMPILER V9.57.0.0   MAIN                                                              04/06/2018 15:43:31 PAGE 3   
+
+ 117   3              Show_Dec_Number(0x8e,Timer);        
+ 118   3            }
+ 119   2            else
+ 120   2              Show_Dec_Number(0x8d,Timer);
+ 121   2            if(Timer == 0)
+ 122   2              {
+ 123   3                TR0 = 0;
+ 124   3                F_F = 1;
+ 125   3              }
+ 126   2          }
+ 127   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    502    ----
+   CONSTANT SIZE    =     48    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     10    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

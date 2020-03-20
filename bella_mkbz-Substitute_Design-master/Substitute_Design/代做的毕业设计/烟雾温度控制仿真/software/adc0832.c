@@ -1,0 +1,76 @@
+#include "adc0832.h"
+
+unsigned char Adc0832_Getvalue(unsigned char channel)
+{
+	unsigned char i, test, adval, dat;
+  adval=0x00;
+  test=0x00;
+  clk=0;
+  dati=1;
+  _nop_();
+	cs=0;        
+	_nop_();
+	clk=1;
+	_nop_();
+  if(channel==0x00)
+   { 
+		clk=0;
+    dati=1;
+    _nop_();
+		clk=1;
+		_nop_();
+		clk=0;                 
+    dati=0;
+    _nop_();
+		clk=1;
+		_nop_();
+	 }
+  else 
+	 { 
+		 clk=0;
+		 dati=1;
+     _nop_();             
+		 clk=1;
+		 _nop_();
+		 clk=1;
+     _nop_();
+		 clk=0;
+		 dati=1;
+	   _nop_();
+	   clk=1;
+	   _nop_();
+	 }
+   clk=0;
+	 dati=1;
+   for(i=0;i<8;i++)
+     {
+				_nop_();
+				adval<<=1;
+				clk=1;
+				_nop_();
+				clk=0;
+				if(dato) 
+					adval|=0x01;  
+				else 
+					adval|=0x00;        
+		 }
+		for(i=0;i<8;i++)
+		{
+			test>>=1;
+			if(dato) 
+				test|=0x80;
+			else 
+				test|=0x00;               
+			_nop_();
+			clk=1;
+			_nop_();
+			clk=0;
+		}
+		if(adval==test)
+			dat=test;
+		_nop_();
+		cs=1;
+		dato=1;
+		clk=1;
+		return dat;
+}

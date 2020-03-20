@@ -1,0 +1,3 @@
+".\Objects\SLAVE.obj" 
+TO ".\Objects\pro" 
+PRINT(".\Listings\pro.m51") RAMSIZE(256) 

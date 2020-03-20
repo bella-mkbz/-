@@ -1,0 +1,6 @@
+"STARTUP.obj",
+"lcd1602.obj",
+"main.obj",
+"iic.obj" 
+TO "main" 
+RAMSIZE(256) 

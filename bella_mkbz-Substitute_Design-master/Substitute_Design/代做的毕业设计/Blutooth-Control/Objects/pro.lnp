@@ -1,0 +1,6 @@
+".\Objects\1602.obj",
+".\Objects\DHT22.obj",
+".\Objects\main.obj",
+".\Objects\button.obj" 
+TO ".\Objects\pro" 
+PRINT(".\Listings\pro.m51") RAMSIZE(256) 

@@ -1,0 +1,113 @@
+C51 COMPILER V9.60.0.0   INTER_KEY                                                         02/02/2020 12:01:48 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE INTER_KEY
+OBJECT MODULE PLACED IN Inter_Key.OBJ
+COMPILER INVOKED BY: D:\software install\Keil_C51\C51\BIN\C51.EXE Inter_Key.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEN
+                    -D TABS(2)
+
+line level    source
+
+   1          #include "Inter_Key.h"
+   2          #include "delay.h"
+   3          
+   4          unsigned char Keyboard(void)
+   5          {
+   6   1         unsigned char temp;
+   7   1         static unsigned char Value=0;
+   8   1          /***第一列拉低***/
+   9   1          P2 = 0XFE;             
+  10   1        Delay1ms(1);
+  11   1        temp = P2;
+  12   1        if(temp!=0XFE)
+  13   1        {
+  14   2          Delay1ms(10);
+  15   2          temp = P2;
+  16   2          if(temp!=0XFE)
+  17   2            {
+  18   3            switch (temp)
+  19   3            {
+  20   4              case 0xfc:return Value=1;
+  21   4              break;
+  22   4            case 0xfa:return Value=2;
+  23   4              break;
+  24   4            case 0xf7:return Value=3;
+  25   4              break;
+  26   4            case 0xee:return Value=4;
+  27   4              break;
+  28   4            case 0xde:return Value=5;
+  29   4              break;
+  30   4            case 0xbe:return Value=6;
+  31   4              break;
+  32   4            case 0x7e:return Value=7;
+  33   4              break;
+  34   4            default:
+  35   4              break;
+  36   4             }
+  37   3          }
+  38   2        }
+  39   1          /***************/
+  40   1        /***第二列拉低***/
+  41   1        P2 = 0XFD;
+  42   1          Delay1ms(1);
+  43   1        temp = P2;
+  44   1        if(temp!=0XFD)
+  45   1         {
+  46   2          Delay1ms(10);
+  47   2          temp = P2;     
+  48   2             if(temp!=0XFD)
+  49   2            {
+  50   3              switch (temp)
+  51   3            {
+  52   4              case  :
+*** ERROR C141 IN LINE 52 OF Inter_Key.c: syntax error near ':', expected 'sizeof'
+  53   4              break;
+C51 COMPILER V9.60.0.0   INTER_KEY                                                         02/02/2020 12:01:48 PAGE 2   
+
+  54   4            case  : 
+*** ERROR C141 IN LINE 54 OF Inter_Key.c: syntax error near ':', expected 'sizeof'
+  55   4              break;
+  56   4              case  :
+*** ERROR C141 IN LINE 56 OF Inter_Key.c: syntax error near ':', expected 'sizeof'
+  57   4              break;
+  58   4            case  : 
+*** ERROR C141 IN LINE 58 OF Inter_Key.c: syntax error near ':', expected 'sizeof'
+  59   4              break;
+  60   4              case  :
+*** ERROR C141 IN LINE 60 OF Inter_Key.c: syntax error near ':', expected 'sizeof'
+  61   4              break;
+  62   4            case  : 
+*** ERROR C141 IN LINE 62 OF Inter_Key.c: syntax error near ':', expected 'sizeof'
+  63   4              break;
+  64   4              case  :
+*** ERROR C141 IN LINE 64 OF Inter_Key.c: syntax error near ':', expected 'sizeof'
+  65   4              break;
+  66   4            default:
+  67   4              break;
+  68   4            }
+  69   3            }
+  70   2         }
+  71   1        /***************/
+  72   1         return Value;
+  73   1      }
+  74          
+  75          
+  76          
+  77          
+  78          
+  79          
+  80          
+  81          
+  82          
+  83          
+  84          
+  85          
+  86          
+  87          
+  88          
+  89          
+  90          
+  91          
+  92          
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  7 ERROR(S)

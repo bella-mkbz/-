@@ -1,0 +1,6 @@
+".\Objects\main.obj",
+".\Objects\bsp_esp8266.obj",
+".\Objects\delay.obj",
+".\Objects\uart.obj" 
+TO ".\Objects\ESP8266" 
+PRINT(".\Listings\ESP8266.m51") RAMSIZE(256) 

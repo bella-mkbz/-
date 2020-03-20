@@ -1,0 +1,68 @@
+#include "dht11.h"
+
+void DHT11_delay_us(unsigned char n)
+{
+    while(--n);
+}
+
+void DHT11_delay_ms(unsigned int z)
+{
+   unsigned int i,j;
+   for(i=z;i>0;i--)
+      for(j=110;j>0;j--);
+}
+
+void DHT11_start()
+{
+   Data=1;
+   DHT11_delay_us(2);
+   Data=0;
+   DHT11_delay_ms(22);   //延时18ms以上
+   Data=1;
+   DHT11_delay_us(30);
+}
+
+unsigned char DHT11_rec_byte()      //接收一个字节
+{
+   unsigned char i,dat=0;
+  for(i=0;i<8;i++)    //从高到低依次接收8位数据
+   {          
+      while(!Data);   ////等待50us低电平过去
+      DHT11_delay_us(8);     //延时60us，如果还为高则数据为1，否则为0 
+      dat<<=1;           //移位使正确接收8位数据，数据为0时直接移位
+      if(Data==1)    //数据为1时，使dat加1来接收数据1
+         dat+=1;
+      while(Data);  //等待数据线拉低    
+    }  
+    return dat;
+}
+
+unsigned char *DHT11_receive()      //接收40位的数据
+{
+    unsigned char R_H,R_L,T_H,T_L,RH,RL,TH,TL,revise; 
+		unsigned char result[2];
+    DHT11_start();
+    if(Data==0)
+    {
+        while(Data==0);   //等待拉高     
+        DHT11_delay_us(40);  //拉高后延时80us
+        R_H=DHT11_rec_byte();    //接收湿度高八位  
+        R_L=DHT11_rec_byte();    //接收湿度低八位  
+        T_H=DHT11_rec_byte();    //接收温度高八位  
+        T_L=DHT11_rec_byte();    //接收温度低八位
+        revise=DHT11_rec_byte(); //接收校正位
+
+        DHT11_delay_us(25);    //结束
+
+        if((R_H+R_L+T_H+T_L)==revise)      //校正
+        {
+            RH=R_H;	//湿度数据
+            RL=R_L;
+            TH=T_H;	//温度数据
+            TL=T_L;
+        } 
+    }
+		result[0] = R_H;
+		result[1] = T_H;
+		return result;
+}

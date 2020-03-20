@@ -1,0 +1,46 @@
+C51 COMPILER V9.60.0.0   DELAY                                                             02/11/2020 19:23:41 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE DELAY
+OBJECT MODULE PLACED IN ..\Output\delay.obj
+COMPILER INVOKED BY: D:\software install\Keil_C51\C51\BIN\C51.EXE delay.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PR
+                    -INT(..\Listing\delay.lst) TABS(2) OBJECT(..\Output\delay.obj)
+
+line level    source
+
+   1          
+   2          /*************  功能说明  **************
+   3          
+   4          本文件为STC15xxx系列的端口初始化程序,用户几乎可以不修改这个程序.
+   5          
+   6          
+   7          ******************************************/
+   8          
+   9          #include  "delay.h"
+*** ERROR C103 IN LINE 52 OF STC12C5Axx.H: '<string>': unclosed string
+*** ERROR C129 IN LINE 52 OF STC12C5Axx.H: missing ';' before '<string>'
+*** ERROR C305 IN LINE 52 OF STC12C5Axx.H: unterminated string/char const
+  10          
+  11          
+  12          
+  13          //========================================================================
+  14          // 函数: void  delay_ms
+  15          // 描述: 延时函数。
+  16          // 参数: ms,要延时的ms数, 这里只支持1~65536ms. 自动适应主时钟.
+  17          // 返回: none.
+  18          // 版本: VER1.0
+  19          // 日期: 2013-4-1
+  20          // 备注: 
+  21          //========================================================================
+  22          void delay_ms(u16 ms)
+  23          {
+  24             u16 i;
+  25             do{
+  26                i = (u16)(MAIN_Fosc / 13000);
+  27                while(--i)  ;   //14T per loop
+  28               }while(--ms);
+  29          }
+  30          
+*** WARNING C316 IN LINE 30 OF delay.c: unterminated conditionals
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  3 ERROR(S)
